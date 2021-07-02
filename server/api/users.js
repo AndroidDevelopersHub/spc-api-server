@@ -25,7 +25,6 @@ module.exports = function (router) {
     //
     router.post('/users/login', validateAuthUser, login);
     router.post('/users/registration', registration);
-    router.get('/me',validateAuthUser,  me);
 }
 
 const schema = Joi.object({
