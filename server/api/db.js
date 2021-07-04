@@ -1,6 +1,6 @@
 const mysql = require("mysql");
 
-let whichServer = 1;  // 1 for Dev server 2 for Local server
+let whichServer = 2;  // 1 for Dev server 2 for Local server
 
 let connection = null;
 
