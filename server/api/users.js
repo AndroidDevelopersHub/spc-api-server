@@ -23,7 +23,7 @@ module.exports = function (router) {
     router.delete('/users/:id',validateAuthUser, _delete);
 
     //
-    router.post('/users/login', validateAuthUser, login);
+    router.post('/users/login',  login);
     router.post('/users/registration', registration);
 }
 
@@ -35,6 +35,13 @@ const schema = Joi.object({
     //token: Joi.string().required()
 });
 
+
+function test(){
+    //123456
+    let password = "123456";
+    let salt =  bcrypt.hashSync(password.toString(),  bcrypt.genSaltSync(10));
+    console.log(salt)
+}
 
 async function login(req, res){
     let email = req.body.email.toLowerCase();
@@ -51,7 +58,6 @@ async function login(req, res){
             return _response.apiFailed(res, err , result)
         }
     })
-
 }
 
 
