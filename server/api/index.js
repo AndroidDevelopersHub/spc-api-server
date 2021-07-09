@@ -8,6 +8,7 @@ router.get('/', (req,res)=>{
 
 require('./users')(router)
 require('./slider')(router)
+require('./withdraw')(router)
 
 module.exports = router;
 

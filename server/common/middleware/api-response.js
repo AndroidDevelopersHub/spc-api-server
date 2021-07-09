@@ -6,7 +6,7 @@ module.exports = {
        return res.status(200).json({
            status: responsecode.statusOk,
            message: msg,
-           items: data,
+           data: data,
            pagination: pagination
        });
    },
@@ -15,7 +15,7 @@ module.exports = {
         return res.status(200).json({
             status: responsecode.statusNo,
             message: msg,
-            items: data
+            data: data
         });
     },
 

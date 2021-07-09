@@ -35,7 +35,6 @@ const schema = Joi.object({
     //token: Joi.string().required()
 });
 
-test()
 
 function test() {
     //123456
@@ -45,20 +44,23 @@ function test() {
 }
 
 async function login(req, res) {
+    let responseData = {}
     let email = req.body.email.toLowerCase();
     let password = req.body.password;
 
-    await db.query("SELECT * FROM `users` WHERE email = '" + email + "'", (err, result) => {
+    await db.query("SELECT * FROM `users` WHERE email = '" + email + "'", (err, result1) => {
         if (!err) {
-            if (result.length > 0) {
-                bcrypt.compare(password, result[0].salt).then(function(result) {
+            if (result1.length > 0) {
+                bcrypt.compare(password, result1[0].salt).then(function(result) {
                     // result == true
                     console.log(result)
                     if (result === true){
                         let token = jwt.sign({user: result[0]}, config.secret, {
                             expiresIn: 186400 // expires in 24 hours
                         });
-                        return _response.apiSuccess(res, responsemsg.found, token)
+                        responseData.result = result1
+                        responseData.token = token
+                        return _response.apiSuccess(res, responsemsg.found,responseData)
                     }else {
                         return _response.apiFailed(res, err, result)
                     }
@@ -85,6 +87,7 @@ function registration(req, res) {
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(req.body.salt, salt);
     req.body.salt = hash
+    req.body.hash = salt
 
 
     /*const { error } = schema.validate(req.body);
@@ -174,28 +177,11 @@ async function list(req, res) {
 
 function update(req, res) {
     let formData = []
-
-    if (req.params.id) {
-        db.query("SELECT * FROM `users` WHERE id='" + req.params.id + "'", (err, result) => {
+    if (req.params.uid) {
+        db.query("SELECT * FROM `users` WHERE uid='" + req.params.uid + "'", (err, result) => {
             if (!err && result.length > 0) {
 
-                formData = result[0]
-                if (req.query.phone) {
-                    formData.phone = req.query.phone
-                }
-                if (req.query.name) {
-                    formData.name = req.query.name
-                }
-                if (req.query.email) {
-                    formData.email = req.query.email
-                }
-                if (req.query.salt) {
-                    formData.salt = req.query.salt
-                }
-                if (req.query.wallet) {
-                    formData.wallet = req.query.wallet
-                }
-                db.query("UPDATE users SET name ='" + formData.name + "',email ='" + formData.email + "',phone ='" + formData.phone + "',salt ='" + formData.salt + "',wallet ='" + formData.wallet + "' WHERE id = '" + req.params.id + "'", (err, result) => {
+                db.query("UPDATE users SET ?", req.body, (err, result) => {
                     if (!err) {
                         return _response.apiSuccess(res, responsemsg.userUpdateSuccess)
                     } else {
@@ -217,7 +203,7 @@ function update(req, res) {
 function details(req, res) {
     //const result = bcrypt.compareSync('123', hash);
     if (req.params.id) {
-        db.query("SELECT * FROM `users` WHERE id='" + req.params.id + "'", (err, result) => {
+        db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.userFound, result)
             } else {
@@ -231,8 +217,8 @@ function details(req, res) {
 
 function _delete(req, res) {
 
-    if (req.params.id) {
-        db.query("SELECT * FROM `users` WHERE id='" + req.params.id + "'", (err, result) => {
+    if (req.params.uid) {
+        db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
             if (!result.length) {
                 return _response.apiWarning(res, responsemsg.userListIsEmpty)
             } else {
@@ -262,8 +248,8 @@ function walletUpdate(req, res) {
 
     let response = []
 
-    if (req.params.id) {
-        db.query("SELECT * FROM `users` WHERE id='" + req.params.id + "'", (err, result) => {
+    if (req.params.uid) {
+        db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
 
             if (!err) {
                 response = result[0].wallet
