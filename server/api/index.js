@@ -17,6 +17,7 @@ require('./payment-settings')(router)
 require('./product-category')(router)
 require('./product')(router)
 require('./gallery')(router)
+require('./task')(router)
 
 
 module.exports = router;
