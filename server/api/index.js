@@ -18,6 +18,8 @@ require('./product-category')(router)
 require('./product')(router)
 require('./gallery')(router)
 require('./task')(router)
+require('./cart')(router)
+
 
 
 module.exports = router;

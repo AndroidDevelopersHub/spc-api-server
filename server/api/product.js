@@ -82,8 +82,10 @@ async function list(req, res) {
 
 
     } else {
-        db.query("SELECT * FROM product LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
+        db.query("SELECT * FROM `product`  LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
             if (!err) {
+
+
                 return _response.apiSuccess(res, result.length + " " + responsemsg.found, result, {
                     page: parseInt(page),
                     limit: parseInt(limit),

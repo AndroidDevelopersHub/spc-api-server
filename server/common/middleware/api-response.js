@@ -20,10 +20,11 @@ module.exports = {
     },
 
 
-    apiWarning: function apiWarning(res, msg){
+    apiWarning: function apiWarning(res, msg,data){
         return res.status(200).json({
             status: responsecode.statusNo,
-            message: msg
+            message: msg,
+            data: data
         });
     }
 
