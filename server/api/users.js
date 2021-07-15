@@ -51,17 +51,17 @@ async function login(req, res) {
     await db.query("SELECT * FROM `users` WHERE email = '" + email + "'", (err, result1) => {
         if (!err) {
             if (result1.length > 0) {
-                bcrypt.compare(password, result1[0].salt).then(function(result) {
+                bcrypt.compare(password, result1[0].salt).then(function (result) {
                     // result == true
                     console.log(result)
-                    if (result === true){
+                    if (result === true) {
                         let token = jwt.sign({user: result[0]}, config.secret, {
                             expiresIn: 186400 // expires in 24 hours
                         });
                         responseData.result = result1
                         responseData.token = token
-                        return _response.apiSuccess(res, responsemsg.found,responseData)
-                    }else {
+                        return _response.apiSuccess(res, responsemsg.found, responseData)
+                    } else {
                         return _response.apiFailed(res, err, result)
                     }
                 });
@@ -76,8 +76,12 @@ async function login(req, res) {
 }
 
 
-function registration(req, res) {
+async function registration(req, res) {
     //
+
+    let referCashArray = [50,45,40,35,30,28,25,22,20,17,15,12,10,8,6,4,2]
+
+    let responseData = {}
     let username = req.body.username;
     let email = req.body.email.toLowerCase();
     let phone = req.body.phone;
@@ -93,16 +97,42 @@ function registration(req, res) {
     /*const { error } = schema.validate(req.body);
     if (error) return _response.apiFailed(res ,error.details[0].message)*/
 
-    db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'", (err, result) => {
+
+    db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
         if (!result.length) {
             console.log('User not exist')
             db.query("INSERT INTO users SET ?", req.body, (err, result) => {
                 if (!err) {
-                    console.log(result)
+
+                    return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                        result: result,
+                    })
+                    /*
+                    var nextRefer = req.body.parent_refer;
+                    var level = 20;
+                    if (nextRefer !== "") {
+                        db.query("SELECT * FROM `users` WHERE username = '" + nextRefer + "' ", (err, result) => {
+                            console.log("000000", result)
+                            if (result.length >= 0){
+
+                                let refer = result[0].win_cash;
+                                db.query("UPDATE  `users` SET win_cash='"+refer+"'  WHERE username ='"+refer+"' ")
+
+                            }else {
+                                return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
+                            }
+
+                        })
+                    } else {
+                        return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                            result: result,
+                        })
+                    }*/
+
                     /*let token = jwt.sign({ user: result[0] }, config.secret, {
                         expiresIn: 86400 // expires in 24 hours
                     });*/
-                    return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
+                   // return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
                 } else {
                     return _response.apiFailed(res, err, result)
                 }
