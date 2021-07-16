@@ -16,8 +16,9 @@ const commonServe = require('../common/services/commonServices')
 
 module.exports = function (router) {
     router.get('/orders', list);
+    router.get('/orders/:uid', listById);
     router.put('/orders/:id', update);
-    router.get('/order-details/:id', details);
+    router.get('/order-details/:order_id', details);
     router.delete('/orders/:id', _delete);
 }
 
@@ -75,6 +76,56 @@ async function list(req ,res ){
 
 }
 
+async function listById(req ,res ){
+
+    var limit = 500;
+    var page = 1;
+    var totalDocs = 0;
+    if (req.query.page){
+        page = req.query.page
+    }
+    if (req.query.limit){
+        limit = req.query.limit
+    }
+    var offset = (page - 1) * limit
+
+
+    db.query("SELECT COUNT(*) AS total FROM orders WHERE  user_id = '"+req.params.uid+"' ", (err, result) => {
+        if (!err) {
+            totalDocs = result[0].total
+        } else {
+
+        }
+    });
+
+
+    //Search by String
+    if (req.query.search_string && req.query.search_string !== ''){
+
+        db.query("SELECT * FROM orders WHERE CONCAT(title) REGEXP '"+req.query.search_string+"' AND user_id = '"+req.params.uid+"' LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
+            if (!err && result.length > 0) {
+                return _response.apiSuccess(res, result.length+" "+responsemsg.found , result,{page: parseInt(page) , limit: parseInt(limit),totalDocs: totalDocs })
+
+            } else {
+                return _response.apiFailed(res, responsemsg.listIsEmpty)
+            }
+        });
+
+
+    }else {
+        db.query("SELECT * FROM orders  WHERE user_id = '"+req.params.uid+"'  LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
+            if (!err) {
+                return _response.apiSuccess(res, result.length+" "+responsemsg.found , result , {page: parseInt(page) , limit: parseInt(limit),totalDocs: totalDocs })
+
+            } else {
+                return _response.apiFailed(res, responsemsg.listIsEmpty )
+            }
+        });
+    }
+
+
+}
+
 function update(req ,res ){
     var formData = []
 
@@ -102,9 +153,8 @@ function update(req ,res ){
 }
 
 function details(req ,res ){
-    //const result = bcrypt.compareSync('123', hash);
     if (req.params.order_id){
-        db.query("SELECT * FROM `order_details` WHERE order_id='"+req.params.order_id+"'", (err, result) => {
+        db.query("SELECT * FROM `order_details` INNER JOIN  product ON product_id = product.id WHERE order_id='"+req.params.order_id+"'", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length+" "+responsemsg.found ,result)
             } else {
