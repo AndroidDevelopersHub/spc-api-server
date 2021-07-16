@@ -26,7 +26,7 @@ module.exports = function (router) {
 
 async function placeOrder(req, res) {
     let user_id = req.body.user_id
-    let order_id = "UFD-"+Math.floor(Math.random() * 899999 + 100000)
+    let order_id = "UFD-" + Math.floor(Math.random() * 899999 + 100000)
     let shipping_cost = 50;
     let delivered_address = req.body.delivered_address
     let status = "pending";
@@ -34,30 +34,29 @@ async function placeOrder(req, res) {
     let total = 99999999999999;
 
 
-    db.query("INSERT INTO `order_details` (user_id , product_id,quantity,price,createdAt, order_id) SELECT user_id, product_id ,quantity,price,createdAt,'" + order_id + "' FROM `cart` WHERE user_id = '" + user_id + "' ", (err , result1)=>{
+    db.query("INSERT INTO `order_details` (user_id , product_id,quantity,price,createdAt, order_id) SELECT user_id, product_id ,quantity,price,createdAt,'" + order_id + "' FROM `cart` WHERE user_id = '" + user_id + "' ", (err, result1) => {
 
-         db.query("DELETE FROM cart WHERE user_id = '"+user_id+"'", (err , resultX) =>{
+        db.query("DELETE FROM cart WHERE user_id = '" + user_id + "'", (err, resultX) => {
 
-             console.log(resultX)
-             db.query("SELECT SUM(price) AS total FROM order_details WHERE user_id = " + user_id + "", (err, result2) => {
+            console.log(resultX)
+            db.query("SELECT SUM(price) AS total FROM order_details WHERE user_id = " + user_id + "", (err, result2) => {
 
-                 total = result2[0].total;
+                total = result2[0].total;
 
-                 db.query("INSERT INTO `orders` SET ?" ,{
-                     total:total,
-                     order_id: order_id,
-                     user_id: user_id,
-                     shipping_cost:shipping_cost,
-                     status:status,
-                     payment_method:payment_method,
-                     delivered_address:delivered_address
-                 } , (err , result3)=>{
-                     return _response.apiSuccess(res,"Order Place successfully", result3)
-                 })
+                db.query("INSERT INTO `orders` SET ?", {
+                    total: total,
+                    order_id: order_id,
+                    user_id: user_id,
+                    shipping_cost: shipping_cost,
+                    status: status,
+                    payment_method: payment_method,
+                    delivered_address: delivered_address
+                }, (err, result3) => {
+                    return _response.apiSuccess(res, "Order Place successfully", result3)
+                })
 
 
-
-             })
+            })
 
         })
 
@@ -99,25 +98,27 @@ function add(req, res) {
                 if (stock >= quantity) {
 
                     req.body.price = quantity * result[0].price
-
                     db.query("INSERT INTO cart SET ?", req.body, (err, result1) => {
 
                         db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = " + user_id + "", (err, cartTotalResponse) => {
 
                             db.query("SELECT * FROM cart WHERE user_id = " + user_id + "", (err, resultFinal) => {
 
-                                return _response.apiSuccess(res, "Cart added successfully", {
 
-                                    cart_details: {
-                                        total: cartTotalResponse[0].total,
-                                        total_cart_item: resultFinal.length,
-                                        updated_item_price: req.body.price,
-                                        quantity: quantity
-                                    },
+                                db.query("UPDATE product SET ? WHERE id =" + product_id + " ", {stock: stock - quantity}, (err, resultCC) => {
+                                    console.log(resultCC)
+                                    return _response.apiSuccess(res, "Cart added successfully", {
 
-                                    //cart_items: resultFinal
-
+                                        cart_details: {
+                                            total: cartTotalResponse[0].total,
+                                            total_cart_item: resultFinal.length,
+                                            updated_item_price: req.body.price,
+                                            quantity: quantity
+                                        },
+                                        //cart_items: resultFinal
+                                    })
                                 })
+
 
                             })
 
@@ -250,16 +251,20 @@ function update(req, res) {
 
                                 db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = " + result1[0].user_id + "", (err, cartTotalResponse) => {
                                     db.query("SELECT * FROM cart WHERE user_id = " + result1[0].user_id + "", (err, resultFinal) => {
-                                        return _response.apiSuccess(res, "Cart update successfully", {
-                                            cart_details: {
-                                                total: cartTotalResponse[0].total,
-                                                total_cart_item: resultFinal.length,
-                                                updated_item_price: req.body.price,
-                                                quantity: quantity
-                                            },
-                                            // cart_items: resultFinal
+                                        db.query("UPDATE product SET ? WHERE id =" + product_id + " ", {stock: stock - quantity}, (err, resultCC) => {
+                                            return _response.apiSuccess(res, "Cart update successfully", {
+                                                cart_details: {
+                                                    total: cartTotalResponse[0].total,
+                                                    total_cart_item: resultFinal.length,
+                                                    updated_item_price: req.body.price,
+                                                    quantity: quantity
+                                                },
+                                                // cart_items: resultFinal
 
+                                            })
                                         })
+
+
                                     })
                                 })
 
