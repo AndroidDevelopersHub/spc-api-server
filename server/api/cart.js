@@ -351,7 +351,6 @@ function details(req, res) {
 }
 
 function _delete(req, res) {
-
     if (req.params.id) {
         db.query("SELECT * FROM `cart` WHERE id='" + req.params.id + "'", (err, result) => {
             if (!result.length) {
@@ -367,12 +366,10 @@ function _delete(req, res) {
                                         return _response.apiSuccess(res, responsemsg.deleteSuccess)
                                     }
                                 })
-                                //return _response.apiSuccess(res, responsemsg.deleteSuccess)
+
                             }
                         })
 
-
-                        return _response.apiSuccess(res, responsemsg.deleteSuccess)
                     } else {
                         return _response.apiFailed(res, err)
                     }
