@@ -19,6 +19,7 @@ require('./product')(router)
 require('./gallery')(router)
 require('./task')(router)
 require('./cart')(router)
+require('./order')(router)
 
 
 
