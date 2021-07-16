@@ -20,6 +20,50 @@ module.exports = function (router) {
     router.put('/cart/', update);
     router.get('/cart/:user_id', details);
     router.delete('/cart/:id', _delete);
+    router.post('/place-order', placeOrder);
+}
+
+
+async function placeOrder(req, res) {
+    let user_id = req.body.user_id
+    let order_id = "UFD-"+Math.floor(Math.random() * 899999 + 100000)
+    let shipping_cost = 50;
+    let delivered_address = req.body.delivered_address
+    let status = "pending";
+    let payment_method = req.body.payment_method;
+    let total = 99999999999999;
+
+
+    db.query("INSERT INTO `order_details` (user_id , product_id,quantity,price,createdAt, order_id) SELECT user_id, product_id ,quantity,price,createdAt,'" + order_id + "' FROM `cart` WHERE user_id = '" + user_id + "' ", (err , result1)=>{
+
+         db.query("DELETE FROM cart WHERE user_id = '"+user_id+"'", (err , resultX) =>{
+
+             console.log(resultX)
+             db.query("SELECT SUM(price) AS total FROM order_details WHERE user_id = " + user_id + "", (err, result2) => {
+
+                 total = result2[0].total;
+
+                 db.query("INSERT INTO `orders` SET ?" ,{
+                     total:total,
+                     order_id: order_id,
+                     user_id: user_id,
+                     shipping_cost:shipping_cost,
+                     status:status,
+                     payment_method:payment_method,
+                     delivered_address:delivered_address
+                 } , (err , result3)=>{
+                     return _response.apiSuccess(res,"Order Place successfully", result3)
+                 })
+
+
+
+             })
+
+        })
+
+
+    })
+
 }
 
 
@@ -45,9 +89,8 @@ function add(req, res) {
                 let stock = parseInt(result[0].stock);
 
                 if (quantity === 0) {
-                    return _response.apiWarning(res, "Minimum quantity required 1",{
-                        cart_details: {
-                        },
+                    return _response.apiWarning(res, "Minimum quantity required 1", {
+                        cart_details: {},
 
                         //cart_items: []
                     })
@@ -59,14 +102,14 @@ function add(req, res) {
 
                     db.query("INSERT INTO cart SET ?", req.body, (err, result1) => {
 
-                        db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = "+user_id+"", (err , cartTotalResponse)=>{
+                        db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = " + user_id + "", (err, cartTotalResponse) => {
 
-                            db.query("SELECT * FROM cart WHERE user_id = "+user_id+"", (err , resultFinal)=>{
+                            db.query("SELECT * FROM cart WHERE user_id = " + user_id + "", (err, resultFinal) => {
 
                                 return _response.apiSuccess(res, "Cart added successfully", {
 
                                     cart_details: {
-                                        total :cartTotalResponse[0].total,
+                                        total: cartTotalResponse[0].total,
                                         total_cart_item: resultFinal.length,
                                         updated_item_price: req.body.price,
                                         quantity: quantity
@@ -79,7 +122,6 @@ function add(req, res) {
                             })
 
                         })
-
 
 
                     })
@@ -179,9 +221,9 @@ function update(req, res) {
     if (error) return _response.apiFailed(res, error.details[0].message)
 
 
-    db.query("SELECT * FROM cart WHERE id = "+req.body.id+"", (err , result1)=>{
+    db.query("SELECT * FROM cart WHERE id = " + req.body.id + "", (err, result1) => {
 
-        if (result1.length  > 0){
+        if (result1.length > 0) {
 
             let product_id = result1[0].product_id;
             let quantity = parseInt(req.body.quantity);
@@ -192,11 +234,10 @@ function update(req, res) {
                         let stock = parseInt(result[0].stock);
 
                         if (quantity === 0) {
-                            return _response.apiWarning(res, "Minimum quantity required 1",{
-                                cart_details: {
-                                },
+                            return _response.apiWarning(res, "Minimum quantity required 1", {
+                                cart_details: {},
 
-                               // cart_items: []
+                                // cart_items: []
                             })
                         }
 
@@ -204,19 +245,19 @@ function update(req, res) {
 
                             req.body.price = quantity * result[0].price
 
-                            db.query("UPDATE cart SET ? WHERE id = "+result1[0].id+" ", req.body, (err, result2) => {
+                            db.query("UPDATE cart SET ? WHERE id = " + result1[0].id + " ", req.body, (err, result2) => {
 
 
-                                db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = "+result1[0].user_id+"", (err , cartTotalResponse)=>{
-                                    db.query("SELECT * FROM cart WHERE user_id = "+result1[0].user_id+"", (err , resultFinal)=>{
+                                db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = " + result1[0].user_id + "", (err, cartTotalResponse) => {
+                                    db.query("SELECT * FROM cart WHERE user_id = " + result1[0].user_id + "", (err, resultFinal) => {
                                         return _response.apiSuccess(res, "Cart update successfully", {
                                             cart_details: {
-                                                total :cartTotalResponse[0].total,
+                                                total: cartTotalResponse[0].total,
                                                 total_cart_item: resultFinal.length,
                                                 updated_item_price: req.body.price,
                                                 quantity: quantity
                                             },
-                                           // cart_items: resultFinal
+                                            // cart_items: resultFinal
 
                                         })
                                     })
@@ -239,53 +280,52 @@ function update(req, res) {
             });
 
 
-
-        }else {
-            return _response.apiWarning(res , "Cart Not found")
+        } else {
+            return _response.apiWarning(res, "Cart Not found")
         }
 
     })
 
-/*
-    if (req.params.id) {
-        db.query("SELECT * FROM `cart` WHERE id='" + req.params.id + "'", (err, result) => {
-            if (!err && result.length > 0) {
+    /*
+        if (req.params.id) {
+            db.query("SELECT * FROM `cart` WHERE id='" + req.params.id + "'", (err, result) => {
+                if (!err && result.length > 0) {
 
-                db.query("UPDATE cart SET ? WHERE id = '" + req.params.id + "'", req.body, (err, result) => {
-                    if (!err) {
-                        return _response.apiSuccess(res, responsemsg.updateSuccess)
-                    } else {
-                        return _response.apiFailed(res, err)
-                    }
-                })
+                    db.query("UPDATE cart SET ? WHERE id = '" + req.params.id + "'", req.body, (err, result) => {
+                        if (!err) {
+                            return _response.apiSuccess(res, responsemsg.updateSuccess)
+                        } else {
+                            return _response.apiFailed(res, err)
+                        }
+                    })
 
-            } else {
-                return _response.apiFailed(res, err)
-            }
-        });
+                } else {
+                    return _response.apiFailed(res, err)
+                }
+            });
 
-    } else {
-        return _response.apiWarning(res, 'Please select id.')
+        } else {
+            return _response.apiWarning(res, 'Please select id.')
 
-    }*/
+        }*/
 }
 
 function details(req, res) {
     //const result = bcrypt.compareSync('123', hash);
     if (req.params.user_id) {
-        db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = "+req.params.user_id+"", (err , cartTotalResponse)=>{
+        db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = " + req.params.user_id + "", (err, cartTotalResponse) => {
 
-            if (cartTotalResponse[0].total === null){
-                return _response.apiWarning(res,"Cart not Found", {})
+            if (cartTotalResponse[0].total === null) {
+                return _response.apiWarning(res, "Cart not Found", {})
             }
 
-            db.query("SELECT * FROM cart WHERE user_id = "+req.params.user_id+"", (err , resultFinal)=>{
+            db.query("SELECT * FROM cart WHERE user_id = " + req.params.user_id + "", (err, resultFinal) => {
 
-                db.query("SELECT * FROM cart INNER JOIN product ON cart.product_id = product.id WHERE user_id = "+req.params.user_id+"", (err , resultFinal1)=>{
+                db.query("SELECT * FROM cart INNER JOIN product ON cart.product_id = product.id WHERE user_id = " + req.params.user_id + "", (err, resultFinal1) => {
 
                     return _response.apiSuccess(res, "Cart Found", {
                         cart_details: {
-                            total : cartTotalResponse[0].total,
+                            total: cartTotalResponse[0].total,
                             total_cart_item: resultFinal.length,
                             updated_item_price: 0,
                             quantity: resultFinal[0].quantity,
