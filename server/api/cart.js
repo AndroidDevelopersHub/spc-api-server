@@ -326,7 +326,7 @@ function details(req, res) {
 
             db.query("SELECT * FROM cart WHERE user_id = " + req.params.user_id + "", (err, resultFinal) => {
 
-                db.query("SELECT * FROM cart INNER JOIN product ON cart.product_id = product.id WHERE user_id = " + req.params.user_id + "", (err, resultFinal1) => {
+                db.query("SELECT cart.id ,cart.user_id , cart.product_id,cart.quantity,cart.price,product.category_id ,product.is_populer,product.is_featured,product.description,product.stock,product.campaign,product.special_price,product.rating,product.status,product.rating,product.image_id,product.image_url FROM cart INNER JOIN product ON cart.product_id = product.id WHERE user_id = " + req.params.user_id + "", (err, resultFinal1) => {
 
                     return _response.apiSuccess(res, "Cart Found", {
                         cart_details: {
@@ -357,8 +357,21 @@ function _delete(req, res) {
             if (!result.length) {
                 return _response.apiWarning(res, responsemsg.listIsEmpty)
             } else {
-                db.query("DELETE FROM `cart` WHERE id='" + req.params.id + "'", (err, result) => {
+                db.query("DELETE FROM `cart` WHERE id='" + req.params.id + "'", (err, result1) => {
                     if (!err) {
+
+                        db.query("SELECT * FROM product WHERE id =" + result[0].product_id + " ", (err, result2) => {
+                            if (!err) {
+                                db.query("UPDATE product SET ? WHERE id =" + result[0].product_id + " ", {stock: parseInt(result2[0].stock) + parseInt(result[0].quantity)}, (err, resultCC) => {
+                                    if (!err) {
+                                        return _response.apiSuccess(res, responsemsg.deleteSuccess)
+                                    }
+                                })
+                                //return _response.apiSuccess(res, responsemsg.deleteSuccess)
+                            }
+                        })
+
+
                         return _response.apiSuccess(res, responsemsg.deleteSuccess)
                     } else {
                         return _response.apiFailed(res, err)
