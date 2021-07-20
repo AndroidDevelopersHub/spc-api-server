@@ -46,10 +46,8 @@ async function placeOrder(req, res) {
                 console.log(aa)
                 console.log(total)
                 if (parseInt(aa) < parseInt(total)) {
-                    console.log("111111")
                     return _response.apiWarning(res, "Low balance!")
                 }else {
-                    console.log("2222222")
                     db.query("INSERT INTO `order_details` (user_id , product_id,quantity,price,createdAt, order_id) SELECT user_id, product_id ,quantity,price,createdAt,'" + order_id + "' FROM `cart` WHERE user_id = '" + user_id + "' ", (err, result1) => {
 
                         db.query("DELETE FROM cart WHERE user_id = " + user_id + "", (err, resultX) => {
