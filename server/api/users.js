@@ -17,11 +17,11 @@ const validateAuthUser = require('../common/middleware/validateAuthorizeUser')
 
 
 module.exports = function (router) {
+    router.post('/admin/login', admin_login);
     router.get('/users', validateAuthUser, list);
     router.put('/users/:id', validateAuthUser, update);
     router.get('/users/:id', validateAuthUser, details);
     router.delete('/users/:id', validateAuthUser, _delete);
-
     //
     router.post('/users/login', login);
     router.post('/users', registration);
@@ -36,11 +36,17 @@ const schema = Joi.object({
 });
 
 
-function test() {
-    //123456
-    let password = "123456";
-    let salt = bcrypt.hashSync(password.toString(), bcrypt.genSaltSync(10));
-    console.log(salt)
+
+function admin_login(req, res){
+    var email = req.body.email.toLowerCase();
+    var password = req.body.password;
+    db.query("SELECT * FROM `admin` WHERE email = '"+email+"' AND password = '"+password+"'", (err, result) =>{
+        if (!err) {
+            return _response.apiSuccess(res, responsemsg.found , result)
+        } else {
+            return _response.apiFailed(res, err , result)
+        }
+    })
 }
 
 async function login(req, res) {
@@ -74,7 +80,6 @@ async function login(req, res) {
     })
 
 }
-
 
 async function registration(req, res) {
     //
