@@ -66,14 +66,14 @@ async function login(req, res) {
                         responseData.token = token
                         return _response.apiSuccess(res, responsemsg.found, responseData)
                     } else {
-                        return _response.apiFailed(res, err, result1)
+                        return _response.apiFailed(res, err, {})
                     }
                 });
             } else {
-                return _response.apiFailed(res, err, result1)
+                return _response.apiFailed(res, err, {})
             }
         } else {
-            return _response.apiFailed(res, err, result1)
+            return _response.apiFailed(res, err, {})
         }
     })
 
