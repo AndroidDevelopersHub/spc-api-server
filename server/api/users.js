@@ -15,7 +15,6 @@ const bcrypt = require('bcrypt');
 const commonServe = require('../common/services/commonServices')
 const validateAuthUser = require('../common/middleware/validateAuthorizeUser')
 
-
 module.exports = function (router) {
     router.post('/admin/login', admin_login);
     router.get('/users', validateAuthUser, list);
@@ -34,7 +33,6 @@ const schema = Joi.object({
     salt: Joi.string().required(),
     //token: Joi.string().required()
 });
-
 
 
 function admin_login(req, res){
@@ -153,7 +151,6 @@ async function registration(req, res) {
 
 
 }
-
 
 async function list(req, res) {
 
