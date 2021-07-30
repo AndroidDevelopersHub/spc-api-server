@@ -37,6 +37,7 @@ function add(req, res) {
             req.body.url = "https://"+req.get('host')+"/"+ avatar.name
             db.query("INSERT INTO gallery SET ?", req.body , (err, result) => {
                 if (!err) {
+                    result.url = req.body.url
                     return _response.apiSuccess(res, responsemsg.saveSuccess , result)
                 } else {
                     return _response.apiFailed(res, err , result)
