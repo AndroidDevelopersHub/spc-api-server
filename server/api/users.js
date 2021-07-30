@@ -213,6 +213,9 @@ async function list(req, res) {
 function update(req, res) {
     let formData = []
     if (req.params.uid) {
+        delete req.body.raw_cash
+        delete req.body.win_cash
+
         db.query("SELECT * FROM `users` WHERE uid='" + req.params.uid + "'", (err, result) => {
             if (!err && result.length > 0) {
 
