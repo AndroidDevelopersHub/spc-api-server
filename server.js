@@ -11,12 +11,12 @@ let multer, storage, path, crypto;
 multer = require("multer");
 path = require("path");
 crypto = require("crypto");
+var CronJob = require('cron').CronJob;
 
 let jwt = require("jsonwebtoken");
 const config = require("./middleware/config.json"); // refresh
 let tokenChecker = require("./middleware/tockenchecker");
-
-//const db = require('./database/db')
+const db = require('./server/api/db')
 const today = new Date().toISOString();
 
 app.use(bodyParser.json());
@@ -64,6 +64,18 @@ app.get("/test", tokenChecker.checkToken, (req, res) => {
         message: "Running secure siteeee Successs",
     });
 });
+var job = new CronJob('0 2 *  * *', function() {
+    console.log('You will see this message every second');
+    db.query("UPDATE daily_task SET ? ", {createdAt: new Date()} ,(err , result) =>{
+        if (!err){
+            console.log("Ok")
+        }else{
+            console.log("Not Ok")
+        }
+    })
+
+}, null, true, 'America/Los_Angeles');
+job.start();
 
 
 
