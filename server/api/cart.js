@@ -389,7 +389,7 @@ function details(req, res) {
 
             db.query("SELECT * FROM cart WHERE user_id = " + req.params.user_id + "", (err, resultFinal) => {
 
-                db.query("SELECT cart.id ,cart.user_id , cart.product_id,cart.quantity,cart.price,product.category_id ,product.is_populer,product.is_featured,product.description,product.stock,product.campaign,product.special_price,product.rating,product.status,product.rating,product.image_id,product.image_url FROM cart INNER JOIN product ON cart.product_id = product.id WHERE user_id = " + req.params.user_id + "", (err, resultFinal1) => {
+                db.query("SELECT cart.id ,cart.user_id , cart.product_id,cart.quantity,cart.price, product.category_id ,product.is_populer,product.is_featured,product.product_name ,product.description,product.stock,product.campaign,product.special_price,product.rating,product.status,product.rating,product.image_id,product.image_url FROM cart INNER JOIN product ON cart.product_id = product.id WHERE user_id = " + req.params.user_id + "", (err, resultFinal1) => {
 
                     return _response.apiSuccess(res, "Cart Found", {
                         cart_details: {
