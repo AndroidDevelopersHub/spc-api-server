@@ -33,8 +33,8 @@ function add(req, res) {
             });
         } else {
             let avatar = req.files.file;
-            avatar.mv('./gallery/' + avatar.name);
-            req.body.url = "https://"+req.get('host')+"/"+ avatar.name
+            avatar.mv('../gallery/' + avatar.name);
+            req.body.url = "https://"+req.get('host')+"/gallery/"+ avatar.name
             db.query("INSERT INTO gallery SET ?", req.body , (err, result) => {
                 if (!err) {
                     result.url = req.body.url

@@ -31,6 +31,8 @@ app.use(
     })
 );
 
+app.use(express.static('public'));
+app.use('/gallery', express.static('gallery'));
 
 //add other middleware
 app.use(cors());
