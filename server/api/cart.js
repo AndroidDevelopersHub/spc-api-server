@@ -59,7 +59,7 @@ async function placeOrder(req, res) {
                                     console.log("----------1")
 
                                     db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
-                                        win_cash: total - myWinCash
+                                        win_cash: myWinCash - total
                                     }, (err22, result11) => {
                                         if (!err22) {
                                             db.query("INSERT INTO `orders` SET ?", {
