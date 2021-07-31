@@ -52,7 +52,7 @@ async function list(req ,res ){
     //Search by String
     if (req.query.search_string && req.query.search_string !== ''){
 
-        db.query("SELECT o.id , o.order_id , o.shipping_cost, o.delivery_address , o. user_id , o.status , o.payment_method , o.createdAt,u.username , u.phone FROM orders AS o  INNER JOIN `users` AS u ON u.uid = o.user_id WHERE CONCAT(title) REGEXP '"+req.query.search_string+"'  LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
+        db.query("SELECT o.id , o.order_id , o.shipping_cost, o.delivery_address , o. user_id , o.status , o.payment_method , o.createdAt,u.username , u.phone FROM `orders` AS o  INNER JOIN `users` AS u ON u.uid = o.user_id WHERE CONCAT(title) REGEXP '"+req.query.search_string+"'  LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length+" "+responsemsg.found , result,{page: parseInt(page) , limit: parseInt(limit),totalDocs: totalDocs })
 
@@ -63,7 +63,7 @@ async function list(req ,res ){
 
 
     }else {
-        db.query("SELECT o.id , o.order_id , o.shipping_cost, o.delivery_address , o. user_id , o.status , o.payment_method , o.createdAt,u.username , u.phone FROM orders AS o  INNER JOIN `users` AS u ON u.uid = o.user_id  LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
+        db.query("SELECT o.id , o.order_id , o.shipping_cost, o.delivery_address , o. user_id , o.status , o.payment_method , o.createdAt,u.username , u.phone FROM `orders` AS o  INNER JOIN `users` AS u ON u.uid = o.user_id  LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
             if (!err) {
                 return _response.apiSuccess(res, result.length+" "+responsemsg.found , result , {page: parseInt(page) , limit: parseInt(limit),totalDocs: totalDocs })
 
