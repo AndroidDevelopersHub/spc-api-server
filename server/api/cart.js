@@ -40,23 +40,24 @@ async function placeOrder(req, res) {
             let myRawCash = parseInt(result00[0].raw_cash);
             let aa = myWinCash+myRawCash;
 
-            db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = " +user_id + "", (err, cartTotalResponse) => {
+            db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = '" +user_id + "'", (err, cartTotalResponse) => {
                 total = cartTotalResponse[0].total
                 console.log(cartTotalResponse[0].total)
                 console.log(aa)
                 console.log(total)
-                if (parseInt(aa) < parseInt(total)) {
-                    return _response.apiWarning(res, "Low balance!")
+                if (total != null && parseInt(aa) < parseInt(total)) {
+                    return _response.apiWarning(res, "Low balance! 1")
                 }else {
                     db.query("INSERT INTO `order_details` (user_id , product_id,quantity,price,createdAt, order_id) SELECT user_id, product_id ,quantity,price,createdAt,'" + order_id + "' FROM `cart` WHERE user_id = '" + user_id + "' ", (err, result1) => {
 
                         db.query("DELETE FROM cart WHERE user_id = " + user_id + "", (err, resultX) => {
 
                             console.log(resultX)
-                            db.query("SELECT SUM(price) AS total FROM order_details WHERE user_id = " + user_id + "", (err, result2) => {
+                            db.query("SELECT SUM(price) AS total FROM `order_details` WHERE user_id = '"+user_id+"' ", (err, result2) => {
                                 total = result2[0].total;
                                 if (myWinCash >= total) {
                                     console.log("----------1")
+                                    console.log(myWinCash - total)
 
                                     db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
                                         win_cash: myWinCash - total
@@ -104,7 +105,7 @@ async function placeOrder(req, res) {
 
                                 } else {
                                     console.log("----------3")
-                                    return _response.apiWarning(res, "Low balance!")
+                                    return _response.apiWarning(res, "Low balance! 2")
                                 }
 
                             })
@@ -116,9 +117,6 @@ async function placeOrder(req, res) {
 
                 }
             })
-
-
-
 
         } else {
             return _response.apiWarning(res, "User not found")
