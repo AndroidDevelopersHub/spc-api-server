@@ -35,14 +35,14 @@ const schema = Joi.object({
 });
 
 
-function admin_login(req, res){
+function admin_login(req, res) {
     var email = req.body.email.toLowerCase();
     var password = req.body.password;
-    db.query("SELECT * FROM `admin` WHERE email = '"+email+"' AND password = '"+password+"'", (err, result) =>{
+    db.query("SELECT * FROM `admin` WHERE email = '" + email + "' AND password = '" + password + "'", (err, result) => {
         if (!err) {
-            return _response.apiSuccess(res, responsemsg.found , result)
+            return _response.apiSuccess(res, responsemsg.found, result)
         } else {
-            return _response.apiFailed(res, err , result)
+            return _response.apiFailed(res, err, result)
         }
     })
 }
@@ -212,30 +212,25 @@ async function list(req, res) {
 
 function update(req, res) {
     let formData = []
-    if (req.params.uid) {
-        delete req.body.raw_cash
-        delete req.body.win_cash
+    delete req.body.raw_cash
+    delete req.body.win_cash
 
-        db.query("SELECT * FROM `users` WHERE uid='" + req.params.uid + "'", (err, result) => {
-            if (!err && result.length > 0) {
+    db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
+        if (!err && result.length > 0) {
+            db.query("UPDATE users SET ? WHERE uid='" + req.params.id + "' ", req.body, (err, result) => {
+                if (!err) {
+                    return _response.apiSuccess(res, responsemsg.userUpdateSuccess)
+                } else {
+                    return _response.apiFailed(res, err)
+                }
+            })
 
-                db.query("UPDATE users SET ?", req.body, (err, result) => {
-                    if (!err) {
-                        return _response.apiSuccess(res, responsemsg.userUpdateSuccess)
-                    } else {
-                        return _response.apiFailed(res, err)
-                    }
-                })
+        } else {
+            return _response.apiFailed(res, err)
+        }
+    });
 
-            } else {
-                return _response.apiFailed(res, err)
-            }
-        });
 
-    } else {
-        return _response.apiWarning(res, 'Please select id.')
-
-    }
 }
 
 function details(req, res) {
