@@ -53,7 +53,7 @@ async function placeOrder(req, res) {
                         db.query("DELETE FROM cart WHERE user_id = " + user_id + "", (err, resultX) => {
 
                             console.log(resultX)
-                            db.query("SELECT SUM(price) AS total FROM `order_details` WHERE user_id = '"+user_id+"' ", (err, result2) => {
+                            db.query("SELECT SUM(price) AS total FROM `order_details` WHERE order_id = '"+order_id+"' ", (err, result2) => {
                                 total = result2[0].total;
                                 if (myWinCash >= total) {
                                     console.log("----------1")
