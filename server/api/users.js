@@ -24,6 +24,8 @@ module.exports = function (router) {
     //
     router.post('/users/login', login);
     router.post('/users', registration);
+    router.post('/users-admin-registration', registrationV2);
+
 }
 
 const schema = Joi.object({
@@ -100,54 +102,186 @@ async function registration(req, res) {
     /*const { error } = schema.validate(req.body);
     if (error) return _response.apiFailed(res ,error.details[0].message)*/
 
+    if (req.body.my_uid){
+        db.query("SELECT * FROM `users` WHERE uid = '" + req.body.my_uid + "'" ,(err , result11)=>{
+
+            let total_cash = /*parseInt(result11[0].win_cash) +*/ parseInt(result11[0].raw_cash)
+            db.query("SELECT * FROM `registration_package` WHERE id = '2' " ,(err , result22)=>{
+                let packagePrice = parseInt(result22[0].price);
+                console.log("Price")
+                console.log(packagePrice)
+                console.log(result22)
+
+                if (total_cash >= packagePrice){
+                    db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
+                        if (!result.length) {
+                            db.query("INSERT INTO users SET ?", req.body, (err, result) => {
+                                if (!err) {
+
+                                    db.query("SELECT * FROM `users` WHERE uid = '" + req.body.my_uid + "'", (err, result) => {
+                                        if (!err && result.length > 0) {
+                                            db.query("UPDATE users SET ? WHERE uid='" + req.body.my_uid + "' ",{raw_cash: total_cash - packagePrice }, (err, result) => {
+                                                if (!err) {
+
+                                                    if (req.body.parent_refer !== "") {
+                                                        refer(req, res, result, req.body.parent_refer)
+                                                    } else {
+                                                        return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                                                            result: result,
+                                                        })
+                                                    }
+
+                                                } else {
+                                                    return _response.apiFailed(res, err)
+                                                }
+                                            })
+
+                                        } else {
+                                            return _response.apiFailed(res, err)
+                                        }
+                                    });
+
+
+                                } else {
+                                    return _response.apiFailed(res, err, result)
+                                }
+                            });
+
+                        } else {
+                            return _response.apiWarning(res, responsemsg.userAlreadyExist)
+                        }
+                    })
+                }else {
+                    return _response.apiWarning(res,"Low Balance!")
+                }
+
+            })
+
+
+        })
+    }
+    else {
+        
+        db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
+            if (!result.length) {
+                db.query("INSERT INTO users SET ?", req.body, (err, result) => {
+                    if (!err) {
+
+                        if (req.body.parent_refer !== "") {
+                            refer(req, res, result, req.body.parent_refer)
+                        } else {
+                            return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                                result: result,
+                            })
+                        }
+                        /*
+                        var nextRefer = req.body.parent_refer;
+                        var level = 20;
+                        if (nextRefer !== "") {
+                            db.query("SELECT * FROM `users` WHERE username = '" + nextRefer + "' ", (err, result) => {
+                                console.log("000000", result)
+                                if (result.length >= 0){
+
+                                    let refer = result[0].win_cash;
+                                    db.query("UPDATE  `users` SET win_cash='"+refer+"'  WHERE username ='"+refer+"' ")
+
+                                }else {
+                                    return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
+                                }
+
+                            })
+                        } else {
+                            return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                                result: result,
+                            })
+                        }*/
+
+                        /*let token = jwt.sign({ user: result[0] }, config.secret, {
+                            expiresIn: 86400 // expires in 24 hours
+                        });*/
+                        // return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
+                    } else {
+                        return _response.apiFailed(res, err, result)
+                    }
+                });
+
+            } else {
+                return _response.apiWarning(res, responsemsg.userAlreadyExist)
+            }
+        })
+    }
+
+}
+
+
+
+async function registrationV2(req, res) {
+    //
+
+    let referCashArray = [50, 45, 40, 35, 30, 28, 25, 22, 20, 17, 15, 12, 10, 8, 6, 4, 2]
+
+    let responseData = {}
+    let username = req.body.username;
+    let email = req.body.email.toLowerCase();
+    let phone = req.body.phone;
+    //let salt =  bcrypt.hashSync(req.body.password.toString(),  bcrypt.genSaltSync(10));
+
+    const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hash = bcrypt.hashSync(req.body.salt, salt);
+    req.body.salt = hash
+    req.body.hash = salt
+
+    /*const { error } = schema.validate(req.body);
+    if (error) return _response.apiFailed(res ,error.details[0].message)*/
 
     db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
-        if (!result.length) {
-            db.query("INSERT INTO users SET ?", req.body, (err, result) => {
-                if (!err) {
+            if (!result.length) {
+                db.query("INSERT INTO users SET ?", req.body, (err, result) => {
+                    if (!err) {
 
-                    if (req.body.parent_refer !== "") {
-                        refer(req, res, result, req.body.parent_refer)
+                        if (req.body.parent_refer !== "") {
+                            refer(req, res, result, req.body.parent_refer)
+                        } else {
+                            return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                                result: result,
+                            })
+                        }
+                        /*
+                        var nextRefer = req.body.parent_refer;
+                        var level = 20;
+                        if (nextRefer !== "") {
+                            db.query("SELECT * FROM `users` WHERE username = '" + nextRefer + "' ", (err, result) => {
+                                console.log("000000", result)
+                                if (result.length >= 0){
+
+                                    let refer = result[0].win_cash;
+                                    db.query("UPDATE  `users` SET win_cash='"+refer+"'  WHERE username ='"+refer+"' ")
+
+                                }else {
+                                    return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
+                                }
+
+                            })
+                        } else {
+                            return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                                result: result,
+                            })
+                        }*/
+
+                        /*let token = jwt.sign({ user: result[0] }, config.secret, {
+                            expiresIn: 86400 // expires in 24 hours
+                        });*/
+                        // return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
                     } else {
-                        return _response.apiSuccess(res, responsemsg.saveSuccess, {
-                            result: result,
-                        })
+                        return _response.apiFailed(res, err, result)
                     }
-                    /*
-                    var nextRefer = req.body.parent_refer;
-                    var level = 20;
-                    if (nextRefer !== "") {
-                        db.query("SELECT * FROM `users` WHERE username = '" + nextRefer + "' ", (err, result) => {
-                            console.log("000000", result)
-                            if (result.length >= 0){
+                });
 
-                                let refer = result[0].win_cash;
-                                db.query("UPDATE  `users` SET win_cash='"+refer+"'  WHERE username ='"+refer+"' ")
-
-                            }else {
-                                return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
-                            }
-
-                        })
-                    } else {
-                        return _response.apiSuccess(res, responsemsg.saveSuccess, {
-                            result: result,
-                        })
-                    }*/
-
-                    /*let token = jwt.sign({ user: result[0] }, config.secret, {
-                        expiresIn: 86400 // expires in 24 hours
-                    });*/
-                    // return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
-                } else {
-                    return _response.apiFailed(res, err, result)
-                }
-            });
-
-        } else {
-            return _response.apiWarning(res, responsemsg.userAlreadyExist)
-        }
-    })
+            } else {
+                return _response.apiWarning(res, responsemsg.userAlreadyExist)
+            }
+        })
 
 
 }
@@ -353,6 +487,7 @@ function signup(req, res) {
 
 //TODO : Do not open
 function refer(req, res, result, xRefer) {
+    
     let referCashArray = [50, 45, 40, 35, 33, 32, 31, 30, 28, 25, 22, 20, 17, 15, 12, 10, 8, 6, 4, 2]
 
     db.query("SELECT * FROM `users` WHERE refer='" + xRefer + "' ", (err1, res1) => {
