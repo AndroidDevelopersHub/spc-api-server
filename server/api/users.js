@@ -102,17 +102,17 @@ async function registration(req, res) {
     /*const { error } = schema.validate(req.body);
     if (error) return _response.apiFailed(res ,error.details[0].message)*/
 
-    if (req.body.my_uid){
-        db.query("SELECT * FROM `users` WHERE uid = '" + req.body.my_uid + "'" ,(err , result11)=>{
+    if (req.body.my_uid) {
+        db.query("SELECT * FROM `users` WHERE uid = '" + req.body.my_uid + "'", (err, result11) => {
 
             let total_cash = /*parseInt(result11[0].win_cash) +*/ parseInt(result11[0].raw_cash)
-            db.query("SELECT * FROM `registration_package` WHERE id = '2' " ,(err , result22)=>{
+            db.query("SELECT * FROM `registration_package` WHERE id = '2' ", (err, result22) => {
                 let packagePrice = parseInt(result22[0].price);
                 console.log("Price")
                 console.log(packagePrice)
                 console.log(result22)
 
-                if (total_cash >= packagePrice){
+                if (total_cash >= packagePrice) {
                     db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
                         if (!result.length) {
                             db.query("INSERT INTO users SET ?", req.body, (err, result) => {
@@ -120,7 +120,7 @@ async function registration(req, res) {
 
                                     db.query("SELECT * FROM `users` WHERE uid = '" + req.body.my_uid + "'", (err, result) => {
                                         if (!err && result.length > 0) {
-                                            db.query("UPDATE users SET ? WHERE uid='" + req.body.my_uid + "' ",{raw_cash: total_cash - packagePrice }, (err, result) => {
+                                            db.query("UPDATE users SET ? WHERE uid='" + req.body.my_uid + "' ", {raw_cash: total_cash - packagePrice}, (err, result) => {
                                                 if (!err) {
 
                                                     if (req.body.parent_refer !== "") {
@@ -151,17 +151,16 @@ async function registration(req, res) {
                             return _response.apiWarning(res, responsemsg.userAlreadyExist)
                         }
                     })
-                }else {
-                    return _response.apiWarning(res,"Low Balance!")
+                } else {
+                    return _response.apiWarning(res, "Low Balance!")
                 }
 
             })
 
 
         })
-    }
-    else {
-        
+    } else {
+
         db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
             if (!result.length) {
                 db.query("INSERT INTO users SET ?", req.body, (err, result) => {
@@ -214,7 +213,6 @@ async function registration(req, res) {
 }
 
 
-
 async function registrationV2(req, res) {
     //
 
@@ -236,52 +234,52 @@ async function registrationV2(req, res) {
     if (error) return _response.apiFailed(res ,error.details[0].message)*/
 
     db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
-            if (!result.length) {
-                db.query("INSERT INTO users SET ?", req.body, (err, result) => {
-                    if (!err) {
+        if (!result.length) {
+            db.query("INSERT INTO users SET ?", req.body, (err, result) => {
+                if (!err) {
 
-                        if (req.body.parent_refer !== "") {
-                            refer(req, res, result, req.body.parent_refer)
-                        } else {
-                            return _response.apiSuccess(res, responsemsg.saveSuccess, {
-                                result: result,
-                            })
-                        }
-                        /*
-                        var nextRefer = req.body.parent_refer;
-                        var level = 20;
-                        if (nextRefer !== "") {
-                            db.query("SELECT * FROM `users` WHERE username = '" + nextRefer + "' ", (err, result) => {
-                                console.log("000000", result)
-                                if (result.length >= 0){
-
-                                    let refer = result[0].win_cash;
-                                    db.query("UPDATE  `users` SET win_cash='"+refer+"'  WHERE username ='"+refer+"' ")
-
-                                }else {
-                                    return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
-                                }
-
-                            })
-                        } else {
-                            return _response.apiSuccess(res, responsemsg.saveSuccess, {
-                                result: result,
-                            })
-                        }*/
-
-                        /*let token = jwt.sign({ user: result[0] }, config.secret, {
-                            expiresIn: 86400 // expires in 24 hours
-                        });*/
-                        // return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
+                    if (req.body.parent_refer !== "") {
+                        refer(req, res, result, req.body.parent_refer)
                     } else {
-                        return _response.apiFailed(res, err, result)
+                        return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                            result: result,
+                        })
                     }
-                });
+                    /*
+                    var nextRefer = req.body.parent_refer;
+                    var level = 20;
+                    if (nextRefer !== "") {
+                        db.query("SELECT * FROM `users` WHERE username = '" + nextRefer + "' ", (err, result) => {
+                            console.log("000000", result)
+                            if (result.length >= 0){
 
-            } else {
-                return _response.apiWarning(res, responsemsg.userAlreadyExist)
-            }
-        })
+                                let refer = result[0].win_cash;
+                                db.query("UPDATE  `users` SET win_cash='"+refer+"'  WHERE username ='"+refer+"' ")
+
+                            }else {
+                                return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
+                            }
+
+                        })
+                    } else {
+                        return _response.apiSuccess(res, responsemsg.saveSuccess, {
+                            result: result,
+                        })
+                    }*/
+
+                    /*let token = jwt.sign({ user: result[0] }, config.secret, {
+                        expiresIn: 86400 // expires in 24 hours
+                    });*/
+                    // return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
+                } else {
+                    return _response.apiFailed(res, err, result)
+                }
+            });
+
+        } else {
+            return _response.apiWarning(res, responsemsg.userAlreadyExist)
+        }
+    })
 
 
 }
@@ -487,7 +485,7 @@ function signup(req, res) {
 
 //TODO : Do not open
 function refer(req, res, result, xRefer) {
-    
+
     let referCashArray = [50, 45, 40, 35, 33, 32, 31, 30, 28, 25, 22, 20, 17, 15, 12, 10, 8, 6, 4, 2]
 
     db.query("SELECT * FROM `users` WHERE refer='" + xRefer + "' ", (err1, res1) => {
@@ -499,6 +497,13 @@ function refer(req, res, result, xRefer) {
                 win_cash: parseInt(referCashArray[0]) + x
             }, (err11, result11) => {
                 if (!err11) {
+                    //Refer income history
+                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                        uid: uid,
+                        value: referCashArray[0]
+                    }, (err, result) => {
+                    });
+
                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                         if (res1.length > 0) {
                             let x = parseInt(res1[0].win_cash);
@@ -508,6 +513,14 @@ function refer(req, res, result, xRefer) {
                                 win_cash: parseInt(referCashArray[1]) + x
                             }, (err11, result11) => {
                                 if (!err11) {
+
+                                    //Refer income history
+                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                        uid: uid,
+                                        value: referCashArray[1]
+                                    }, (err, result) => {
+                                    });
+
                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                         if (res1.length > 0) {
                                             let x = parseInt(res1[0].win_cash);
@@ -517,6 +530,14 @@ function refer(req, res, result, xRefer) {
                                                 win_cash: parseInt(referCashArray[2]) + x
                                             }, (err11, result11) => {
                                                 if (!err11) {
+
+                                                    //Refer income history
+                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                        uid: uid,
+                                                        value: referCashArray[2]
+                                                    }, (err, result) => {
+                                                    });
+
                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                         if (res1.length > 0) {
                                                             let x = parseInt(res1[0].win_cash);
@@ -526,6 +547,14 @@ function refer(req, res, result, xRefer) {
                                                                 win_cash: parseInt(referCashArray[3]) + x
                                                             }, (err11, result11) => {
                                                                 if (!err11) {
+
+                                                                    //Refer income history
+                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                        uid: uid,
+                                                                        value: referCashArray[3]
+                                                                    }, (err, result) => {
+                                                                    });
+
                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                         if (res1.length > 0) {
                                                                             let x = parseInt(res1[0].win_cash);
@@ -535,6 +564,14 @@ function refer(req, res, result, xRefer) {
                                                                                 win_cash: parseInt(referCashArray[4]) + x
                                                                             }, (err11, result11) => {
                                                                                 if (!err11) {
+
+                                                                                    //Refer income history
+                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                        uid: uid,
+                                                                                        value: referCashArray[4]
+                                                                                    }, (err, result) => {
+                                                                                    });
+
                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                         if (res1.length > 0) {
                                                                                             let x = parseInt(res1[0].win_cash);
@@ -544,6 +581,14 @@ function refer(req, res, result, xRefer) {
                                                                                                 win_cash: parseInt(referCashArray[5]) + x
                                                                                             }, (err11, result11) => {
                                                                                                 if (!err11) {
+
+                                                                                                    //Refer income history
+                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                        uid: uid,
+                                                                                                        value: referCashArray[5]
+                                                                                                    }, (err, result) => {
+                                                                                                    });
+
                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                         if (res1.length > 0) {
                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -553,6 +598,13 @@ function refer(req, res, result, xRefer) {
                                                                                                                 win_cash: parseInt(referCashArray[6]) + x
                                                                                                             }, (err11, result11) => {
                                                                                                                 if (!err11) {
+                                                                                                                    //Refer income history
+                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                        uid: uid,
+                                                                                                                        value: referCashArray[6]
+                                                                                                                    }, (err, result) => {
+                                                                                                                    });
+
                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                         if (res1.length > 0) {
                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -562,6 +614,14 @@ function refer(req, res, result, xRefer) {
                                                                                                                                 win_cash: parseInt(referCashArray[7]) + x
                                                                                                                             }, (err11, result11) => {
                                                                                                                                 if (!err11) {
+
+                                                                                                                                    //Refer income history
+                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                        uid: uid,
+                                                                                                                                        value: referCashArray[7]
+                                                                                                                                    }, (err, result) => {
+                                                                                                                                    });
+
                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                         if (res1.length > 0) {
                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -571,6 +631,14 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                 win_cash: parseInt(referCashArray[8]) + x
                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                    //Refer income history
+                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                        uid: uid,
+                                                                                                                                                        value: referCashArray[8]
+                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                    });
+
                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -580,6 +648,14 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                 win_cash: parseInt(referCashArray[9]) + x
                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                    //Refer income history
+                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                        uid: uid,
+                                                                                                                                                                        value: referCashArray[9]
+                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                    });
+
                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -589,6 +665,14 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                 win_cash: parseInt(referCashArray[10]) + x
                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                        value: referCashArray[10]
+                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                    });
+
                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -598,6 +682,14 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                                 win_cash: parseInt(referCashArray[11]) + x
                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                        value: referCashArray[11]
+                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                    });
+
                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -607,6 +699,13 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                                                 win_cash: parseInt(referCashArray[12]) + x
                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                 if (!err11) {
+                                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                        value: referCashArray[12]
+                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                    });
+
                                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -616,6 +715,15 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                                                                 win_cash: parseInt(referCashArray[13]) + x
                                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                                        value: referCashArray[13]
+                                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                                    });
+
+
                                                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -625,6 +733,14 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                                                                                 win_cash: parseInt(referCashArray[14]) + x
                                                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                                                        value: referCashArray[14]
+                                                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                                                    });
+
                                                                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -634,6 +750,14 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                                                                                                 win_cash: parseInt(referCashArray[15]) + x
                                                                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                                                                        value: referCashArray[15]
+                                                                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                                                                    });
+
                                                                                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -643,6 +767,14 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                                                                                                                 win_cash: parseInt(referCashArray[16]) + x
                                                                                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                                                                                        value: referCashArray[16]
+                                                                                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                                                                                    });
+
                                                                                                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -652,24 +784,51 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                                                                                                                                 win_cash: parseInt(referCashArray[17]) + x
                                                                                                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                                                                                                        value: referCashArray[17]
+                                                                                                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                                                                                                    });
+
                                                                                                                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
                                                                                                                                                                                                                                                                                                             let yRefer = res1[0].parent_refer;
                                                                                                                                                                                                                                                                                                             let uid = res1[0].uid;
                                                                                                                                                                                                                                                                                                             db.query("UPDATE users SET ? WHERE uid = '" + uid + "'", {
-                                                                                                                                                                                                                                                                                                                win_cash: parseInt(referCashArray[17]) + x
+                                                                                                                                                                                                                                                                                                                win_cash: parseInt(referCashArray[18]) + x
                                                                                                                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                                                                                                                        value: referCashArray[18]
+                                                                                                                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                                                                                                                    });
+
+
                                                                                                                                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                                                                                                                                         if (res1.length > 0) {
+
                                                                                                                                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
                                                                                                                                                                                                                                                                                                                             let yRefer = res1[0].parent_refer;
                                                                                                                                                                                                                                                                                                                             let uid = res1[0].uid;
                                                                                                                                                                                                                                                                                                                             db.query("UPDATE users SET ? WHERE uid = '" + uid + "'", {
-                                                                                                                                                                                                                                                                                                                                win_cash: parseInt(referCashArray[18]) + x
+                                                                                                                                                                                                                                                                                                                                win_cash: parseInt(referCashArray[19]) + x
                                                                                                                                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                                                                                                                                 if (!err11) {
+
+                                                                                                                                                                                                                                                                                                                                    //Refer income history
+                                                                                                                                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                                                                                                                                        value: referCashArray[19]
+                                                                                                                                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                                                                                                                                    });
+
+
                                                                                                                                                                                                                                                                                                                                     db.query("SELECT * FROM `users` WHERE refer='" + yRefer + "' ", (err1, res1) => {
                                                                                                                                                                                                                                                                                                                                         if (res1.length > 0) {
                                                                                                                                                                                                                                                                                                                                             let x = parseInt(res1[0].win_cash);
@@ -679,6 +838,12 @@ function refer(req, res, result, xRefer) {
                                                                                                                                                                                                                                                                                                                                                 win_cash: parseInt(referCashArray[19]) + x
                                                                                                                                                                                                                                                                                                                                             }, (err11, result11) => {
                                                                                                                                                                                                                                                                                                                                                 if (!err11) {
+//Refer income history
+                                                                                                                                                                                                                                                                                                                                                    db.query("INSERT INTO `refer_income_history` SET ?", {
+                                                                                                                                                                                                                                                                                                                                                        uid: uid,
+                                                                                                                                                                                                                                                                                                                                                        value: referCashArray[19]
+                                                                                                                                                                                                                                                                                                                                                    }, (err, result) => {
+                                                                                                                                                                                                                                                                                                                                                    });
 
                                                                                                                                                                                                                                                                                                                                                 }
                                                                                                                                                                                                                                                                                                                                             })

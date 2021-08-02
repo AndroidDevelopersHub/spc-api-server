@@ -50,8 +50,16 @@ function taskComplete(req, res) {
 
                                         if (result3.length > 0) {
                                             let sum = result2[0].point + result3[0].win_cash;
+
                                             db.query("UPDATE users SET win_cash = " + sum + " WHERE uid = " + req.body.uid + " ", (err, resultFinal) => {
-                                                return _response.apiSuccess(res, "Task Complete")
+
+                                                db.query("INSERT INTO `daily_bonus_history` SET ?", {uid: req.body.uid , value: result2[0].point} , (err, result) => {
+                                                    if (!err) {
+                                                        return _response.apiSuccess(res, "Task Complete")
+                                                    } else {
+                                                        return _response.apiSuccess(res, "Task Complete")
+                                                    }
+                                                });
                                             })
                                         } else {
                                             return _response.apiWarning(res, "User not found")
