@@ -20,7 +20,7 @@ require('./gallery')(router)
 require('./task')(router)
 require('./cart')(router)
 require('./order')(router)
-
+require('./version')(router)
 
 
 module.exports = router;
