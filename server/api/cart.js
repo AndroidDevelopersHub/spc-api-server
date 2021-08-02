@@ -41,81 +41,87 @@ async function placeOrder(req, res) {
             let aa = myWinCash+myRawCash;
 
             db.query("SELECT SUM(price) AS total FROM cart WHERE user_id = '" +user_id + "'", (err, cartTotalResponse) => {
-                total = cartTotalResponse[0].total
-                console.log(cartTotalResponse[0].total)
-                console.log(aa)
-                console.log(total)
-                if (total != null && parseInt(aa) < parseInt(total)) {
-                    return _response.apiWarning(res, "Low balance! 1")
+
+                if (cartTotalResponse[0].total === null){
+                    return _response.apiFailed(res, "Cart not found")
                 }else {
-                    db.query("INSERT INTO `order_details` (user_id , product_id,quantity,price,createdAt, order_id) SELECT user_id, product_id ,quantity,price,createdAt,'" + order_id + "' FROM `cart` WHERE user_id = '" + user_id + "' ", (err, result1) => {
+                    total = cartTotalResponse[0].total
+                    console.log(cartTotalResponse[0].total)
+                    console.log(aa)
+                    console.log(total)
+                    if (total != null && parseInt(aa) < parseInt(total)) {
+                        return _response.apiWarning(res, "Low balance! 1")
+                    }else {
+                        db.query("INSERT INTO `order_details` (user_id , product_id,quantity,price,createdAt, order_id) SELECT user_id, product_id ,quantity,price,createdAt,'" + order_id + "' FROM `cart` WHERE user_id = '" + user_id + "' ", (err, result1) => {
 
-                        db.query("DELETE FROM cart WHERE user_id = " + user_id + "", (err, resultX) => {
+                            db.query("DELETE FROM cart WHERE user_id = " + user_id + "", (err, resultX) => {
 
-                            console.log(resultX)
-                            db.query("SELECT SUM(price) AS total FROM `order_details` WHERE order_id = '"+order_id+"' ", (err, result2) => {
-                                total = result2[0].total;
-                                if (myWinCash >= total) {
-                                    console.log("----------1")
-                                    console.log(myWinCash - total)
+                                console.log(resultX)
+                                db.query("SELECT SUM(price) AS total FROM `order_details` WHERE order_id = '"+order_id+"' ", (err, result2) => {
+                                    total = result2[0].total;
+                                    if (myWinCash >= total) {
+                                        console.log("----------1")
+                                        console.log(myWinCash - total)
 
-                                    db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
-                                        win_cash: myWinCash - total
-                                    }, (err22, result11) => {
-                                        if (!err22) {
-                                            db.query("INSERT INTO `orders` SET ?", {
-                                                total: total,
-                                                order_id: order_id,
-                                                user_id: user_id,
-                                                shipping_cost: shipping_cost,
-                                                status: status,
-                                                payment_method: payment_method,
-                                                delivered_address: delivered_address
-                                            }, (err, result3) => {
-                                                return _response.apiSuccess(res, "Order Place successfully", result3)
-                                            })
-                                        }
-                                    })
+                                        db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
+                                            win_cash: myWinCash - total
+                                        }, (err22, result11) => {
+                                            if (!err22) {
+                                                db.query("INSERT INTO `orders` SET ?", {
+                                                    total: total,
+                                                    order_id: order_id,
+                                                    user_id: user_id,
+                                                    shipping_cost: shipping_cost,
+                                                    status: status,
+                                                    payment_method: payment_method,
+                                                    delivered_address: delivered_address
+                                                }, (err, result3) => {
+                                                    return _response.apiSuccess(res, "Order Place successfully", result3)
+                                                })
+                                            }
+                                        })
 
-                                } else if ((myWinCash + myRawCash) > total) {
-                                    console.log("----------2")
+                                    } else if ((myWinCash + myRawCash) > total) {
+                                        console.log("----------2")
 
-                                    let a = total - myWinCash
-                                    let b = myRawCash - a;
+                                        let a = total - myWinCash
+                                        let b = myRawCash - a;
 
-                                    db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
-                                        win_cash: 0,
-                                        raw_cash: b
-                                    }, (err11, result11) => {
+                                        db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
+                                            win_cash: 0,
+                                            raw_cash: b
+                                        }, (err11, result11) => {
 
-                                        if (!err11) {
-                                            db.query("INSERT INTO `orders` SET ?", {
-                                                total: total,
-                                                order_id: order_id,
-                                                user_id: user_id,
-                                                shipping_cost: shipping_cost,
-                                                status: status,
-                                                payment_method: payment_method,
-                                                delivered_address: delivered_address
-                                            }, (err, result3) => {
-                                                return _response.apiSuccess(res, "Order Place successfully", result3)
-                                            })
-                                        }
-                                    })
+                                            if (!err11) {
+                                                db.query("INSERT INTO `orders` SET ?", {
+                                                    total: total,
+                                                    order_id: order_id,
+                                                    user_id: user_id,
+                                                    shipping_cost: shipping_cost,
+                                                    status: status,
+                                                    payment_method: payment_method,
+                                                    delivered_address: delivered_address
+                                                }, (err, result3) => {
+                                                    return _response.apiSuccess(res, "Order Place successfully", result3)
+                                                })
+                                            }
+                                        })
 
-                                } else {
-                                    console.log("----------3")
-                                    return _response.apiWarning(res, "Low balance! 2")
-                                }
+                                    } else {
+                                        console.log("----------3")
+                                        return _response.apiWarning(res, "Low balance! 2")
+                                    }
+
+                                })
 
                             })
 
+
                         })
 
-
-                    })
-
+                    }
                 }
+
             })
 
         } else {
