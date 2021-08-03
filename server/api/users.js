@@ -123,6 +123,13 @@ async function registration(req, res) {
                                             db.query("UPDATE users SET ? WHERE uid='" + req.body.my_uid + "' ", {raw_cash: total_cash - packagePrice}, (err, result) => {
                                                 if (!err) {
 
+                                                    //Refer income history
+                                                    db.query("INSERT INTO `joining_cost_history` SET ?", {
+                                                        uid: req.body.my_uid,
+                                                        value: packagePrice
+                                                    }, (err, result) => {
+                                                    });
+
                                                     if (req.body.parent_refer !== "") {
                                                         refer(req, res, result, req.body.parent_refer)
                                                     } else {

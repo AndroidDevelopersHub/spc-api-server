@@ -21,6 +21,7 @@ require('./task')(router)
 require('./cart')(router)
 require('./order')(router)
 require('./version')(router)
+require('./history')(router)
 
 
 module.exports = router;
