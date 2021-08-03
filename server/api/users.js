@@ -212,7 +212,7 @@ async function registration(req, res) {
 
 }
 
-
+// for admin
 async function registrationV2(req, res) {
     //
 
@@ -310,7 +310,9 @@ async function list(req, res) {
     //Search by String
     if (req.query.search_string && req.query.search_string !== '') {
 
-        db.query("SELECT * FROM users WHERE CONCAT(name, email,phone) REGEXP '" + req.query.search_string + "'  LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
+        let a = "%"+req.query.search_string+"%"
+
+        db.query("SELECT * FROM users WHERE CONCAT(username, email,phone) LIKE '" + a + "'  LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.redeemFound, result, {
                     page: parseInt(page),

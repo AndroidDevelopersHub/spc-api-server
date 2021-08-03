@@ -67,7 +67,7 @@ async function list(req, res) {
     //Search by String
     if (req.query.search_string && req.query.search_string !== '') {
 
-        db.query("SELECT * FROM product WHERE CONCAT(title) REGEXP '" + req.query.search_string + "'  LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
+        db.query("SELECT * FROM product WHERE CONCAT(title) LIKE '%" + req.query.search_string + "%'  LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.found, result, {
                     page: parseInt(page),
