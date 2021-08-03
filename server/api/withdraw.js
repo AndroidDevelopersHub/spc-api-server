@@ -125,7 +125,7 @@ async function list(req, res) {
     //Search by String
     if (req.query.search_string && req.query.search_string !== '') {
 
-        db.query("SELECT w.id,w.amount, w.payment_method, w.uid,w.account_number ,w.payment_settings_id, w.status ,w.createdAt , u.username , u.phone FROM `withdraw_request` AS w INNER JOIN `users` AS u ON u.uid = w.uid WHERE CONCAT(title) REGEXP '" + req.query.search_string + "'  LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
+        db.query("SELECT w.id,w.amount, w.payment_method, w.uid,w.account_number ,w.payment_settings_id, w.status ,w.createdAt , u.username , u.phone FROM `withdraw_request` AS w INNER JOIN `users` AS u ON u.uid = w.uid WHERE CONCAT(title) LIKE '%" + req.query.search_string + "%' ORDER BY w.id DESC LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.found, result, {
                     page: parseInt(page),
@@ -140,7 +140,7 @@ async function list(req, res) {
 
 
     } else {
-        db.query("SELECT w.id,w.amount, w.payment_method, w.uid,w.account_number ,w.payment_settings_id, w.status ,w.createdAt , u.username , u.phone FROM `withdraw_request` AS w INNER JOIN `users` AS u ON u.uid = w.uid LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
+        db.query("SELECT w.id,w.amount, w.payment_method, w.uid,w.account_number ,w.payment_settings_id, w.status ,w.createdAt , u.username , u.phone FROM `withdraw_request` AS w INNER JOIN `users` AS u ON u.uid = w.uid ORDER BY w.id DESC LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
             if (!err) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.found, result, {
                     page: parseInt(page),

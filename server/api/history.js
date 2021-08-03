@@ -152,7 +152,6 @@ function details(req, res) {
                                     if (result6) responseData.total_joining_cost = result6[0].total_joining_cost; else responseData.total_joining_cost = 0
 
 
-
                                     return _response.apiSuccess(res, responsemsg.found, responseData)
 
                                 })

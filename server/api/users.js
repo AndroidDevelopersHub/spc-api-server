@@ -319,7 +319,7 @@ async function list(req, res) {
 
         let a = "%"+req.query.search_string+"%"
 
-        db.query("SELECT * FROM users WHERE CONCAT(username, email,phone) LIKE '" + a + "'  LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
+        db.query("SELECT * FROM users WHERE CONCAT(username, email,phone) LIKE '" + a + "' ORDER BY users.uid DESC LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.redeemFound, result, {
                     page: parseInt(page),
@@ -334,7 +334,7 @@ async function list(req, res) {
 
 
     } else {
-        db.query("SELECT * FROM users LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
+        db.query("SELECT * FROM users ORDER BY users.uid DESC LIMIT " + limit + " OFFSET " + offset + "", (err, result) => {
             if (!err) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.userFound, result, {
                     page: parseInt(page),
