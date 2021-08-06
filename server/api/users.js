@@ -355,6 +355,11 @@ function update(req, res) {
     let formData = []
     delete req.body.raw_cash
     delete req.body.win_cash
+    const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hash = bcrypt.hashSync(req.body.salt, salt);
+    req.body.salt = hash
+    req.body.hash = salt
 
     db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
         if (!err && result.length > 0) {
