@@ -391,7 +391,7 @@ function details(req, res) {
 
 function _delete(req, res) {
 
-    if (req.params.uid) {
+    if (req.params.id) {
         db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
             if (!result.length) {
                 return _response.apiWarning(res, responsemsg.userListIsEmpty)
