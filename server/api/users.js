@@ -392,11 +392,11 @@ function details(req, res) {
 function _delete(req, res) {
 
     if (req.params.id) {
-        db.query("SELECT * FROM `users` WHERE uid=" + req.params.id + "", (err, result) => {
+        db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
             if (!result.length) {
                 return _response.apiWarning(res, responsemsg.userListIsEmpty)
             } else {
-                db.query("DELETE FROM `users` WHERE id=" + req.params.id + "", (err, result) => {
+                db.query("DELETE FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
                     if (!err) {
                         return _response.apiSuccess(res, responsemsg.userDeleteSuccess)
                     } else {
