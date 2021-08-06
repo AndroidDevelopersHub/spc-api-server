@@ -384,11 +384,17 @@ function update(req, res) {
 function updateByAdmin(req, res) {
     let formData = []
 
-   /* const saltRounds = 10;
-    const salt = bcrypt.genSaltSync(saltRounds);
-    const hash = bcrypt.hashSync(req.body.salt, salt);
-    req.body.salt = hash
-    req.body.hash = salt*/
+    if (req.body.salt !== ""){
+        const saltRounds = 10;
+        const salt = bcrypt.genSaltSync(saltRounds);
+        const hash = bcrypt.hashSync(req.body.salt, salt);
+        req.body.salt = hash
+        req.body.hash = salt
+    }else {
+        delete req.body.salt
+        delete req.body.hash
+    }
+
 
     db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
         if (!err && result.length > 0) {
