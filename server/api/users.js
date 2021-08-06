@@ -19,6 +19,7 @@ module.exports = function (router) {
     router.post('/admin/login', admin_login);
     router.get('/users', validateAuthUser, list);
     router.put('/users/:id', validateAuthUser, update);
+    router.put('/users-admin/:id', validateAuthUser, updateByAdmin);
     router.get('/users/:id', validateAuthUser, details);
     router.delete('/users/:id', validateAuthUser, _delete);
     //
@@ -355,6 +356,34 @@ function update(req, res) {
     let formData = []
     delete req.body.raw_cash
     delete req.body.win_cash
+   /* const saltRounds = 10;
+    const salt = bcrypt.genSaltSync(saltRounds);
+    const hash = bcrypt.hashSync(req.body.salt, salt);
+    req.body.salt = hash
+    req.body.hash = salt*/
+
+    db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
+        if (!err && result.length > 0) {
+            db.query("UPDATE users SET ? WHERE uid='" + req.params.id + "' ", req.body, (err, result) => {
+                if (!err) {
+                    return _response.apiSuccess(res, responsemsg.userUpdateSuccess)
+                } else {
+                    return _response.apiFailed(res, err)
+                }
+            })
+
+        } else {
+            return _response.apiFailed(res, err)
+        }
+    });
+
+
+}
+
+
+function updateByAdmin(req, res) {
+    let formData = []
+
    /* const saltRounds = 10;
     const salt = bcrypt.genSaltSync(saltRounds);
     const hash = bcrypt.hashSync(req.body.salt, salt);
