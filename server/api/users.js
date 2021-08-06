@@ -104,7 +104,7 @@ async function registration(req, res) {
     if (error) return _response.apiFailed(res ,error.details[0].message)*/
 
     db.query("SELECT * FROM `users` WHERE placement_id = '" + req.body.placement_id + "'", (err, resultX) => {
-        if (resultX.length < 3){
+        if (resultX.length < 4){
 
             if (req.body.my_uid) {
                 db.query("SELECT * FROM `users` WHERE uid = '" + req.body.my_uid + "'", (err, result11) => {
