@@ -20,6 +20,7 @@ module.exports = function (router) {
     router.put('/slider/:id', update);*/
     router.get('/history/:id', details);
     /*router.delete('/slider/:id', _delete);*/
+    router.get('/placement/:id', list);
 }
 
 
@@ -43,58 +44,40 @@ function add(req, res) {
 
 async function list(req, res) {
 
-    var limit = 500;
-    var page = 1;
-    var totalDocs = 0;
-    if (req.query.page) {
-        page = req.query.page
-    }
-    if (req.query.limit) {
-        limit = req.query.limit
-    }
-    var offset = (page - 1) * limit
 
-
-    db.query("SELECT COUNT(*) AS total FROM slider", (err, result) => {
+    db.query("SELECT * FROM users WHERE placement_id = '" + req.params.id + "'", (err, result) => {
         if (!err) {
-            totalDocs = result[0].total
-        } else {
 
+            let responseData = {}
+
+            responseData.tree = result
+
+            let query1 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result[0].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+            let query2 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result[1].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+            let query3 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result[2].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+
+            db.query(query1, (err, result) => {
+                if (!err) {
+                    responseData.tree[0].one = result.length
+                    db.query(query2, (err, result) => {
+                        if (!err) {
+                            responseData.tree[0].two = result.length
+                            db.query(query3, (err, result) => {
+                                if (!err) {
+                                    responseData.tree[0].three = result.length
+                                    return _response.apiSuccess(res,   " " + responsemsg.found, responseData)
+                                }
+                            })
+                        }
+                    })
+                }
+            })
+
+
+        } else {
+            return _response.apiFailed(res, responsemsg.listIsEmpty)
         }
     });
-
-
-    //Search by String
-    if (req.query.search_string && req.query.search_string !== '') {
-
-        db.query("SELECT * FROM slider WHERE CONCAT(title) REGEXP '" + req.query.search_string + "'  LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
-            if (!err && result.length > 0) {
-                return _response.apiSuccess(res, result.length + " " + responsemsg.found, result, {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
-                    totalDocs: totalDocs
-                })
-
-            } else {
-                return _response.apiFailed(res, responsemsg.listIsEmpty)
-            }
-        });
-
-
-    } else {
-        db.query("SELECT * FROM slider LIMIT " + limit + " OFFSET " + offset + " ", (err, result) => {
-            if (!err) {
-                return _response.apiSuccess(res, result.length + " " + responsemsg.found, result, {
-                    page: parseInt(page),
-                    limit: parseInt(limit),
-                    totalDocs: totalDocs
-                })
-
-            } else {
-                return _response.apiFailed(res, responsemsg.listIsEmpty)
-            }
-        });
-    }
 
 
 }
