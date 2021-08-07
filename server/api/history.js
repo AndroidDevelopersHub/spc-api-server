@@ -42,44 +42,115 @@ function add(req, res) {
 
 }
 
-async function list(req, res) {
+async function list(req, response) {
 
+    let dataX = []
 
-    db.query("SELECT * FROM users WHERE placement_id = '" + req.params.id + "'", (err, result) => {
+    db.query("SELECT uid,username FROM users WHERE placement_id = '" + req.params.id + "'", (err, result1) => {
         if (!err) {
 
             let responseData = {}
 
-            responseData.tree = result
+            placementTree(req, req.params.id, "a",function (result) {
+                dataX.push(result)
+                if (result1[0].uid !== undefined){
 
-            let query1 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result[0].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
-            let query2 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result[1].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
-            let query3 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result[2].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+                    placementTree(req, result1[0].uid, "b",function (result) {
+                        dataX.push(result)
+                        if (result1[1].uid !== undefined){
 
-            db.query(query1, (err, result) => {
-                if (!err) {
-                    responseData.tree[0].one = result.length
-                    db.query(query2, (err, result) => {
-                        if (!err) {
-                            responseData.tree[0].two = result.length
-                            db.query(query3, (err, result) => {
-                                if (!err) {
-                                    responseData.tree[0].three = result.length
-                                    return _response.apiSuccess(res,   " " + responsemsg.found, responseData)
+                            placementTree(req, result1[1].uid, "c",function (result) {
+                                dataX.push(result)
+                                if (result1[1].uid !== undefined){
+
+
+                                    placementTree(req, result1[2].uid, "d",function (result) {
+                                        dataX.push(result)
+                                        if (result1[2].uid !== undefined){
+                                            return _response.apiSuccess(response,"",dataX)
+                                        }else {
+                                            return _response.apiSuccess(response,"",dataX)
+                                        }
+                                    })
+
+                                }else {
+                                    return _response.apiSuccess(response,"",dataX)
                                 }
                             })
+
+                        }else {
+                            return _response.apiSuccess(response,"",dataX)
                         }
                     })
+
+                }else {
+                    return _response.apiSuccess(response,"",dataX)
                 }
             })
 
 
+
+        }
+    })
+    //
+
+
+
+}
+
+
+function placementTree(req, id ,name, callback) {
+    db.query("SELECT uid,username FROM users WHERE placement_id = '" + id + "'", (err, result1) => {
+        if (!err) {
+            let responseData = {}
+            //responseData.tree_one = result1
+
+
+            let query1 = ""
+            let query2 = ""
+            let query3 = ""
+
+            if (result1[0] !== undefined) query1 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result1[0].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+            if (result1[1] !== undefined) query2 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result1[1].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+            if (result1[2] !== undefined) query3 = "select uid,username,placement_id from (select * from users order by placement_id, uid) products_sorted, (select @pv := '" + result1[2].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+            if (query1 !== "") {
+                db.query(query1, (err, result) => {
+                    if (!err) {
+                        responseData[name] = {}
+                        responseData[name].one = result.length
+                        if (query2 !== "") {
+                            db.query(query2, (err, result) => {
+                                if (!err) {
+                                    responseData[name].two = result.length
+                                    if (query1 !== "") {
+                                        db.query(query3, (err, result) => {
+                                            if (!err) {
+                                                responseData[name].three = result.length
+                                                //return _response.apiSuccess(res, " " + responsemsg.found, responseData)
+                                                return callback(responseData)
+
+                                            }
+                                        })
+                                    } else {
+                                        return callback(responseData)
+                                        //return _response.apiSuccess(res,   " " + responsemsg.found, responseData);
+                                    }
+                                }
+                            })
+                        } else {
+                            // return _response.apiSuccess(res,   " " + responsemsg.found, responseData);
+                            return callback(responseData)
+                        }
+                    }
+                })
+            } else {
+
+                return callback(responseData)
+            }
         } else {
             return _response.apiFailed(res, responsemsg.listIsEmpty)
         }
     });
-
-
 }
 
 function update(req, res) {
