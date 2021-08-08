@@ -43,51 +43,56 @@ function add(req, res) {
 }
 
 async function list(req, response) {
-
     let dataX = []
+    let responseData = {
+        tree:dataX
+    }
+    
 
-    db.query("SELECT uid,username FROM users WHERE placement_id = '" + req.params.id + "'", (err, result1) => {
+    db.query("SELECT uid,username,parent_refer , refer, createdAt FROM users WHERE placement_id = '" + req.params.id + "'", (err, result1) => {
         if (!err) {
 
-            let responseData = {}
+            console.log(result1)
 
-            placementTree(req, req.params.id, "a",function (result) {
+
+            responseData.user_data = result1
+
+            placementTree(req, req.params.id, "a", function (result) {
                 dataX.push(result)
-                if (result1[0].uid !== undefined){
-
-                    placementTree(req, result1[0].uid, "b",function (result) {
-                        dataX.push(result)
-                        if (result1[1].uid !== undefined){
-
-                            placementTree(req, result1[1].uid, "c",function (result) {
-                                dataX.push(result)
-                                if (result1[1].uid !== undefined){
 
 
-                                    placementTree(req, result1[2].uid, "d",function (result) {
-                                        dataX.push(result)
-                                        if (result1[2].uid !== undefined){
-                                            return _response.apiSuccess(response,"",dataX)
-                                        }else {
-                                            return _response.apiSuccess(response,"",dataX)
-                                        }
-                                    })
+                   if (result1[0].uid !== undefined) {
+                       placementTree(req, result1[0].uid, "b", function (result) {
+                           dataX.push(result)
+                           if (result1[1].uid !== undefined) {
 
-                                }else {
-                                    return _response.apiSuccess(response,"",dataX)
-                                }
-                            })
+                               placementTree(req, result1[1].uid, "c", function (result) {
+                                   dataX.push(result)
+                                   if (result1[2].uid !== undefined) {
+                                       placementTree(req, result1[2].uid, "d", function (result) {
+                                           dataX.push(result)
+                                           if (result1[2].uid !== undefined) {
+                                               return _response.apiSuccess(response, "", responseData)
+                                           } else {
+                                               return _response.apiSuccess(response, "", responseData)
+                                           }
+                                       })
 
-                        }else {
-                            return _response.apiSuccess(response,"",dataX)
-                        }
-                    })
+                                   } else {
+                                       return _response.apiSuccess(response, "", responseData)
+                                   }
+                               })
 
-                }else {
-                    return _response.apiSuccess(response,"",dataX)
-                }
+                           } else {
+                               return _response.apiSuccess(response, "", responseData)
+                           }
+                       })
+                   } else {
+                       return _response.apiSuccess(response, "", responseData)
+                   }
+
+
             })
-
 
 
         }
@@ -95,11 +100,10 @@ async function list(req, response) {
     //
 
 
-
 }
 
 
-function placementTree(req, id ,name, callback) {
+function placementTree(req, id, name, callback) {
     db.query("SELECT uid,username FROM users WHERE placement_id = '" + id + "'", (err, result1) => {
         if (!err) {
             let responseData = {}
@@ -117,18 +121,20 @@ function placementTree(req, id ,name, callback) {
                 db.query(query1, (err, result) => {
                     if (!err) {
                         responseData[name] = {}
-                        responseData[name].one = result.length
+                        responseData[name].one = result.length + 1
                         if (query2 !== "") {
                             db.query(query2, (err, result) => {
                                 if (!err) {
-                                    responseData[name].two = result.length
-                                    if (query1 !== "") {
+                                    responseData[name].two = result.length + 1
+                                    if (query3 !== "") {
                                         db.query(query3, (err, result) => {
                                             if (!err) {
-                                                responseData[name].three = result.length
+                                                responseData[name].three = result.length + 1
                                                 //return _response.apiSuccess(res, " " + responsemsg.found, responseData)
                                                 return callback(responseData)
 
+                                            }else {
+                                                return callback(responseData)
                                             }
                                         })
                                     } else {
@@ -141,6 +147,8 @@ function placementTree(req, id ,name, callback) {
                             // return _response.apiSuccess(res,   " " + responsemsg.found, responseData);
                             return callback(responseData)
                         }
+                    }else {
+                        return callback(responseData)
                     }
                 })
             } else {
