@@ -15,31 +15,8 @@ const commonServe = require('../common/services/commonServices')
 
 
 module.exports = function (router) {
-    /*router.get('/history', list);
-    router.post('/slider', add);
-    router.put('/slider/:id', update);*/
     router.get('/history/:id', details);
-    /*router.delete('/slider/:id', _delete);*/
     router.get('/placement/:id', list);
-}
-
-
-function add(req, res) {
-    //
-
-    // const { error } = schema.validate(req.body);
-    // if (error) return _response.apiFailed(res ,error.details[0].message)
-
-    console.log('User not exist')
-    db.query("INSERT INTO slider SET ?", req.body, (err, result) => {
-        if (!err) {
-            return _response.apiSuccess(res, responsemsg.saveSuccess, result)
-        } else {
-            return _response.apiFailed(res, err, result)
-        }
-    });
-
-
 }
 
 async function list(req, response) {
@@ -53,63 +30,62 @@ async function list(req, response) {
 
     db.query("SELECT uid,username,parent_refer , refer, createdAt FROM users WHERE uid = '" + req.params.id + "'", (err, result3) => {
         if (!err) {
+            if (result3.length >= 0){
+                user_data.push(result3[0])
 
-            user_data.push(result3[0])
+                db.query("SELECT uid,username,parent_refer , refer, createdAt FROM users WHERE placement_id = '" + req.params.id + "'", (err, result1) => {
+                    if (!err) {
 
-            db.query("SELECT uid,username,parent_refer , refer, createdAt FROM users WHERE placement_id = '" + req.params.id + "'", (err, result1) => {
-                if (!err) {
-
-                    for(var i=0; i<result1.length; i++){
-                        user_data.push(result1[i])
-                    }
-                    responseData.user_data = user_data
-
-                    placementTree(req, req.params.id, "a", function (result) {
-                        dataX.push(result)
-
-
-                        if (result1[0].uid !== undefined) {
-                            placementTree(req, result1[0].uid, "b", function (result) {
-                                dataX.push(result)
-                                if (result1[1].uid !== undefined) {
-
-                                    placementTree(req, result1[1].uid, "c", function (result) {
-                                        dataX.push(result)
-                                        if (result1[2].uid !== undefined) {
-                                            placementTree(req, result1[2].uid, "d", function (result) {
-                                                dataX.push(result)
-                                                if (result1[2].uid !== undefined) {
-                                                    return _response.apiSuccess(response, "", responseData)
-                                                } else {
-                                                    return _response.apiSuccess(response, "", responseData)
-                                                }
-                                            })
-
-                                        } else {
-                                            return _response.apiSuccess(response, "", responseData)
-                                        }
-                                    })
-
-                                } else {
-                                    return _response.apiSuccess(response, "", responseData)
-                                }
-                            })
-                        } else {
-                            return _response.apiSuccess(response, "", responseData)
+                        for(var i=0; i<result1.length; i++){
+                            user_data.push(result1[i])
                         }
+                        responseData.user_data = user_data
+
+                        placementTree(req, req.params.id, "a", function (result) {
+                            dataX.push(result)
 
 
-                    })
+                            if (result1[0].uid !== undefined) {
+                                placementTree(req, result1[0].uid, "b", function (result) {
+                                    dataX.push(result)
+                                    if (result1[1].uid !== undefined) {
+
+                                        placementTree(req, result1[1].uid, "c", function (result) {
+                                            dataX.push(result)
+                                            if (result1[2].uid !== undefined) {
+                                                placementTree(req, result1[2].uid, "d", function (result) {
+                                                    dataX.push(result)
+                                                    if (result1[2].uid !== undefined) {
+                                                        return _response.apiSuccess(response, "", responseData)
+                                                    } else {
+                                                        return _response.apiSuccess(response, "", responseData)
+                                                    }
+                                                })
+
+                                            } else {
+                                                return _response.apiSuccess(response, "", responseData)
+                                            }
+                                        })
+
+                                    } else {
+                                        return _response.apiSuccess(response, "", responseData)
+                                    }
+                                })
+                            } else {
+                                return _response.apiSuccess(response, "", responseData)
+                            }
 
 
-                }
-            })
-            //
+                        })
+
+
+                    }
+                })
+                //
+            }
         }})
 
 }
-
-
 function placementTree(req, id, name, callback) {
     db.query("SELECT uid,username FROM users WHERE placement_id = '" + id + "'", (err, result1) => {
         if (!err) {
@@ -167,33 +143,6 @@ function placementTree(req, id, name, callback) {
         }
     });
 }
-
-function update(req, res) {
-    var formData = []
-
-    if (req.params.id) {
-        db.query("SELECT * FROM `slider` WHERE id='" + req.params.id + "'", (err, result) => {
-            if (!err && result.length > 0) {
-
-                db.query("UPDATE slider SET ? WHERE id = '" + req.params.id + "'", req.body, (err, result) => {
-                    if (!err) {
-                        return _response.apiSuccess(res, responsemsg.updateSuccess)
-                    } else {
-                        return _response.apiFailed(res, err)
-                    }
-                })
-
-            } else {
-                return _response.apiFailed(res, err)
-            }
-        });
-
-    } else {
-        return _response.apiWarning(res, 'Please select id.')
-
-    }
-}
-
 function details(req, res) {
     //const result = bcrypt.compareSync('123', hash);
     let responseData = {}
@@ -247,25 +196,3 @@ function details(req, res) {
     }
 }
 
-
-function _delete(req, res) {
-
-    if (req.params.id) {
-        db.query("SELECT * FROM `slider` WHERE id='" + req.params.id + "'", (err, result) => {
-            if (!result.length) {
-                return _response.apiWarning(res, responsemsg.listIsEmpty)
-            } else {
-                db.query("DELETE FROM `slider` WHERE id='" + req.params.id + "'", (err, result) => {
-                    if (!err) {
-                        return _response.apiSuccess(res, responsemsg.deleteSuccess)
-                    } else {
-                        return _response.apiFailed(res, err)
-                    }
-                });
-            }
-
-        });
-    } else {
-        return _response.apiWarning(res, 'Please select id')
-    }
-}
