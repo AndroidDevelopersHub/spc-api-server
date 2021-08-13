@@ -19,9 +19,9 @@ module.exports = function (router) {
     router.get('/daily-task', list);
     router.post('/daily-task', add);
     router.put('/daily-task/:id', update);
+    router.put('/daily-task-update', updateAll);
     router.get('/daily-task/:id', details);
     router.delete('/daily-task/:id', _delete);
-
     router.post('/daily-task-complete', taskComplete);
 }
 
@@ -184,6 +184,18 @@ function update(req, res) {
         return _response.apiWarning(res, 'Please select id.')
 
     }
+}
+
+function updateAll(req, res) {
+    db.query("UPDATE daily_task SET ? ", {createdAt: new Date()} ,(err , result) =>{
+        if (!err){
+            console.log("Ok")
+            return _response.apiSuccess(res, responsemsg.updateSuccess)
+        }else{
+            console.log("Not Ok")
+            return _response.apiFailed(res, err)
+        }
+    })
 }
 
 function details(req, res) {
