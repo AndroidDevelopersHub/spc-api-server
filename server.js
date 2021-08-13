@@ -12,7 +12,6 @@ multer = require("multer");
 path = require("path");
 crypto = require("crypto");
 var CronJob = require('cron').CronJob;
-
 let jwt = require("jsonwebtoken");
 const config = require("./middleware/config.json"); // refresh
 let tokenChecker = require("./middleware/tockenchecker");
