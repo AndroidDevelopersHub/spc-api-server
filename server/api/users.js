@@ -117,7 +117,7 @@ async function registration(req, res) {
                         console.log(result22)
 
                         if (total_cash >= packagePrice) {
-                            db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
+                            db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' OR refer = '" + req.body.refer + "' ", (err, result) => {
                                 if (!result.length) {
                                     db.query("INSERT INTO users SET ?", req.body, (err, result) => {
                                         if (!err) {
@@ -249,7 +249,7 @@ async function registrationV2(req, res) {
     /*const { error } = schema.validate(req.body);
     if (error) return _response.apiFailed(res ,error.details[0].message)*/
 
-    db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
+    db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' OR refer = '" + req.body.refer + "' ", (err, result) => {
         if (!result.length) {
             db.query("INSERT INTO users SET ?", req.body, (err, result) => {
                 if (!err) {
