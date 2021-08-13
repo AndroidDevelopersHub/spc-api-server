@@ -22,6 +22,8 @@ require('./cart')(router)
 require('./order')(router)
 require('./version')(router)
 require('./history')(router)
+require('./transaction')(router)
+
 
 
 module.exports = router;
