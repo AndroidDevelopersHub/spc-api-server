@@ -104,10 +104,11 @@ async function registration(req, res) {
     if (error) return _response.apiFailed(res ,error.details[0].message)*/
 
     db.query("SELECT * FROM `users` WHERE placement_id = '" + req.body.placement_id + "'", (err, resultX) => {
-        if (resultX.length < 4){
+        if (resultX.length < 3){
             db.query("SELECT * FROM `users` WHERE placement_id = '" + req.body.placement_id + "' AND team_position <=> '"+req.body.team_position+"' ", (err, resultX0) => {
-                if (resultX0.length >= 0){
-                    return _response.apiWarning(res , "Team "+req.body.team_position+" is no Empty" )
+                console.log(resultX0.length)
+                if (resultX0.length > 0){
+                    return _response.apiWarning(res , "Team "+req.body.team_position+" is not Empty" )
                 }else {
                     if (req.body.my_uid) {
                         db.query("SELECT * FROM `users` WHERE uid = '" + req.body.my_uid + "'", (err, result11) => {
@@ -175,6 +176,8 @@ async function registration(req, res) {
                         })
                     }
                     else {
+                        return _response.apiWarning(res , "Please enter my_uid" )
+                        /*
                         db.query("SELECT * FROM `users` WHERE email = '" + email + "' OR phone = '" + phone + "'  OR username = '" + username + "' ", (err, result) => {
                             if (!result.length) {
                                 db.query("INSERT INTO users SET ?", req.body, (err, result) => {
@@ -187,7 +190,7 @@ async function registration(req, res) {
                                                 result: result,
                                             })
                                         }
-                                        /*
+                                        /!*
                                         var nextRefer = req.body.parent_refer;
                                         var level = 20;
                                         if (nextRefer !== "") {
@@ -207,11 +210,11 @@ async function registration(req, res) {
                                             return _response.apiSuccess(res, responsemsg.saveSuccess, {
                                                 result: result,
                                             })
-                                        }*/
+                                        }*!/
 
-                                        /*let token = jwt.sign({ user: result[0] }, config.secret, {
+                                        /!*let token = jwt.sign({ user: result[0] }, config.secret, {
                                             expiresIn: 86400 // expires in 24 hours
-                                        });*/
+                                        });*!/
                                         // return _response.apiSuccess(res, responsemsg.userSaveSuccess, result)
                                     } else {
                                         return _response.apiFailed(res, err, result)
@@ -222,6 +225,7 @@ async function registration(req, res) {
                                 return _response.apiWarning(res, responsemsg.userAlreadyExist)
                             }
                         })
+                    */
                     }
                 }
             })
