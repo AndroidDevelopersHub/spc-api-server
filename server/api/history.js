@@ -20,7 +20,10 @@ module.exports = function (router) {
 }
 
 async function list(req, response) {
-    let dataX = []
+    let dataX = [
+
+
+    ]
     let user_data = []
     let responseData = {
         //tree: dataX,
@@ -31,7 +34,8 @@ async function list(req, response) {
     db.query("SELECT uid,username,parent_refer , refer, createdAt FROM users WHERE uid = '" + req.params.id + "'", (err, result3) => {
         if (!err) {
             if (result3.length >= 0) {
-                user_data.push(result3[0])
+                let userData = {...result3[0] , ...{one: 0 , two: 0, three:0}}
+                user_data.push(userData)
 
                 db.query("SELECT uid,username,parent_refer , refer, createdAt FROM users WHERE placement_id = '" + req.params.id + "'", (err, result1) => {
                     if (!err) {
@@ -41,23 +45,25 @@ async function list(req, response) {
                             //user_data.push(result1[i])
                             user_data.push(userData)
 
+
                         }
                         responseData.user_data = user_data
                         placementTree(req, req.params.id, "a", function (result) {
-                            dataX.push(result)
-                            responseData.user_data[0] = {...responseData.user_data[0] , ...dataX[0].a}
-                            if (result1.length >= 0) {
+                            if (result1.length > 0) {
+                                dataX.push(result)
+                                responseData.user_data[0] = {...responseData.user_data[0] , ...dataX[0].a}
+
                                 if (result1[0].uid) {
                                     if (result1[0].uid !== undefined) {
                                         placementTree(req, result1[0].uid, "b", function (result) {
                                             dataX.push(result)
                                             responseData.user_data[1] = {...responseData.user_data[1] , ...dataX[1].b}
-                                            if (result1[1].uid !== undefined) {
-
+                                            if (result1.length > 1) {
+                                                console.log(result1)
                                                 placementTree(req, result1[1].uid, "c", function (result) {
                                                     dataX.push(result)
                                                     responseData.user_data[2] = {...responseData.user_data[2] , ...dataX[2].c}
-                                                    if (result1[2].uid !== undefined) {
+                                                    if (result1.length > 2) {
                                                         placementTree(req, result1[2].uid, "d", function (result) {
                                                             dataX.push(result)
                                                             responseData.user_data[3] = {...responseData.user_data[3] , ...dataX[3].d}

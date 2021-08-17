@@ -434,7 +434,18 @@ function updateByAdmin(req, res) {
 
 function details(req, res) {
     //const result = bcrypt.compareSync('123', hash);
-    if (req.params.id) {
+
+    if (req.query.lite_data){
+        db.query("SELECT uid,username,email  FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
+            if (!err && result.length > 0) {
+                return _response.apiSuccess(res, result.length + " " + responsemsg.userFound, result)
+            } else {
+                return _response.apiWarning(res, responsemsg.userListIsEmpty)
+            }
+        });
+    }
+
+    else if (req.params.id) {
         db.query("SELECT * FROM `users` WHERE uid='" + req.params.id + "'", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length + " " + responsemsg.userFound, result)

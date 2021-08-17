@@ -17,11 +17,70 @@ const commonServe = require('../common/services/commonServices')
 module.exports = function (router) {
     router.put('/transaction', update);
     router.get('/transaction/:uid', listById);
+    router.put('/transaction-raw' , rawToraw)
 
 }
 
 
+function rawToraw (req,res){
+    var formData = []
+    let responseData = {}
 
+    let from_uid = req.body.from_uid;
+    let to_uid = req.body.to_uid;
+    let transfer_amount = req.body.transfer_amount;
+
+    db.query("SELECT * FROM `users` WHERE uid='"+req.body.from_uid+"'", (err, result) => {
+        if (!err){
+            let raw_cash = result[0].raw_cash
+            if (parseInt(raw_cash) >= parseInt(transfer_amount)){
+                let finalRaw_cash =  parseInt(raw_cash) - parseInt(transfer_amount)
+
+                db.query("SELECT * FROM `users` WHERE uid='"+req.body.to_uid+"'", (err, result) => {
+                    if (!err && result.length > 0) {
+                        let raw_cash2 = result[0].raw_cash
+                        db.query("UPDATE users SET ? WHERE uid = '"+req.body.from_uid+"'" , {raw_cash: finalRaw_cash} ,(err , result1) => {
+                            if (!err) {
+
+                                let inc = parseInt(raw_cash2) + parseInt(transfer_amount)
+
+                                db.query("UPDATE users SET ? WHERE uid = '"+req.body.to_uid+"'" , {raw_cash: inc}, (err , result1) => {
+                                    console.log(err)
+                                    if (!err) {
+
+                                        //Insert Transaction History
+                                        db.query("INSERT INTO `balance_transfer_history` SET ?", {
+                                            from_id: from_uid,
+                                            to_id: to_uid,
+                                            transfer_amount: transfer_amount
+                                        }, (err, result) => {
+                                        });
+
+                                        responseData.transfer_amount = transfer_amount;
+                                        responseData.from = from_uid
+                                        responseData.to = to_uid;
+
+                                        return _response.apiSuccess(res, "Balance Transferred Successfully" ,responseData)
+                                    }
+                                })
+
+
+                            }
+                        })
+
+                    }else {
+                        return  _response.apiWarning(res,"User not found")
+                    }
+                })
+
+
+
+            }else {
+                return  _response.apiWarning(res,"Low balance!")
+            }
+        }
+    })
+}
 
 
 function listById(req ,res ){
