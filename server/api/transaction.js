@@ -33,7 +33,7 @@ function history1(req,res){
 
         db.query("SELECT * FROM `balance_transfer_history` WHERE from_id='"+req.params.uid+"'", (err, result) => {
             if (!err){
-                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+                return _response.apiSuccess(res, "" ,result)
             }})
     }else {
         return  _response.apiWarning(res,"Insert uid")
@@ -45,7 +45,7 @@ function history2(req,res){
 
         db.query("SELECT * FROM `balance_convert_history` WHERE uid='"+req.params.uid+"'", (err, result) => {
             if (!err){
-                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+                return _response.apiSuccess(res, "" ,result)
             }})
     }else {
         return  _response.apiWarning(res,"Insert uid")
@@ -57,7 +57,7 @@ function history3(req,res){
 
         db.query("SELECT * FROM `refer_income_history` WHERE uid='"+req.params.uid+"'", (err, result) => {
             if (!err){
-                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+                return _response.apiSuccess(res, "" ,result)
             }})
     }else {
         return  _response.apiWarning(res,"Insert uid")
@@ -69,7 +69,7 @@ function history4(req,res){
 
         db.query("SELECT * FROM `joining_cost_history` WHERE uid='"+req.params.uid+"'", (err, result) => {
             if (!err){
-                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+                return _response.apiSuccess(res, "" ,result)
             }})
     }else {
         return  _response.apiWarning(res,"Insert uid")
@@ -79,9 +79,9 @@ function history4(req,res){
 function history5(req,res){
     if (req.params.uid){
 
-        db.query("SELECT * FROM `daily_bonus_history` WHERE from_id='"+req.params.uid+"'", (err, result) => {
+        db.query("SELECT * FROM `daily_bonus_history` WHERE uid='"+req.params.uid+"'", (err, result) => {
             if (!err){
-                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+                return _response.apiSuccess(res, "" ,result)
             }})
     }else {
         return  _response.apiWarning(res,"Insert uid")
