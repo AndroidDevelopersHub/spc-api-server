@@ -19,7 +19,76 @@ module.exports = function (router) {
     router.get('/transaction/:uid', listById);
     router.put('/transaction-raw' , rawToraw)
 
+    router.get('/balance-transfer-history/:uid', history1);
+    router.get('/balance-convert-history/:uid', history2);
+    router.get('/refer-income-history/:uid', history3);
+    router.get('/joining-cost-history/:uid', history4);
+    router.get('/daily-bonus-history/:uid', history5);
+
+
 }
+
+function history1(req,res){
+    if (req.params.uid){
+
+        db.query("SELECT * FROM `balance_transfer_history` WHERE from_id='"+req.params.uid+"'", (err, result) => {
+            if (!err){
+                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+            }})
+    }else {
+        return  _response.apiWarning(res,"Insert uid")
+    }
+}
+
+function history2(req,res){
+    if (req.params.uid){
+
+        db.query("SELECT * FROM `balance_convert_history` WHERE uid='"+req.params.uid+"'", (err, result) => {
+            if (!err){
+                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+            }})
+    }else {
+        return  _response.apiWarning(res,"Insert uid")
+    }
+}
+
+function history3(req,res){
+    if (req.params.uid){
+
+        db.query("SELECT * FROM `refer_income_history` WHERE uid='"+req.params.uid+"'", (err, result) => {
+            if (!err){
+                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+            }})
+    }else {
+        return  _response.apiWarning(res,"Insert uid")
+    }
+}
+
+function history4(req,res){
+    if (req.params.uid){
+
+        db.query("SELECT * FROM `joining_cost_history` WHERE uid='"+req.params.uid+"'", (err, result) => {
+            if (!err){
+                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+            }})
+    }else {
+        return  _response.apiWarning(res,"Insert uid")
+    }
+}
+
+function history5(req,res){
+    if (req.params.uid){
+
+        db.query("SELECT * FROM `daily_bonus_history` WHERE from_id='"+req.params.uid+"'", (err, result) => {
+            if (!err){
+                return _response.apiSuccess(res, "Balance Transferred Successfully" ,result)
+            }})
+    }else {
+        return  _response.apiWarning(res,"Insert uid")
+    }
+}
+
+
 
 
 function rawToraw (req,res){
