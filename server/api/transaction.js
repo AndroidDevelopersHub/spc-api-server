@@ -31,7 +31,7 @@ module.exports = function (router) {
 function history1(req,res){
     if (req.params.uid){
 
-        db.query("SELECT * FROM `balance_transfer_history` WHERE from_id='"+req.params.uid+"'", (err, result) => {
+        db.query("SELECT w.from_id , w.to_id , w.transfer_amount, w.createdAt , u1.username AS receiver_username FROM `balance_transfer_history` AS w INNER JOIN `users` AS u ON u.uid = w.from_id INNER JOIN `users` AS u1 ON u1.uid = w.to_id  WHERE from_id='"+req.params.uid+"'", (err, result) => {
             if (!err){
                 return _response.apiSuccess(res, "" ,result)
             }})
@@ -99,56 +99,61 @@ function rawToraw (req,res){
     let to_uid = req.body.to_uid;
     let transfer_amount = req.body.transfer_amount;
 
-    db.query("SELECT * FROM `users` WHERE uid='"+req.body.from_uid+"'", (err, result) => {
-        if (!err){
-            let raw_cash = result[0].raw_cash
-            if (parseInt(raw_cash) >= parseInt(transfer_amount)){
-                let finalRaw_cash =  parseInt(raw_cash) - parseInt(transfer_amount)
+    if (from_uid === to_uid){
+        return  _response.apiWarning(res,"Same user not allowed")
+    }else {
+        db.query("SELECT * FROM `users` WHERE uid='"+req.body.from_uid+"'", (err, result) => {
+            if (!err){
+                let raw_cash = result[0].raw_cash
+                if (parseInt(raw_cash) >= parseInt(transfer_amount)){
+                    let finalRaw_cash =  parseInt(raw_cash) - parseInt(transfer_amount)
 
-                db.query("SELECT * FROM `users` WHERE uid='"+req.body.to_uid+"'", (err, result) => {
-                    if (!err && result.length > 0) {
-                        let raw_cash2 = result[0].raw_cash
-                        db.query("UPDATE users SET ? WHERE uid = '"+req.body.from_uid+"'" , {raw_cash: finalRaw_cash} ,(err , result1) => {
-                            if (!err) {
+                    db.query("SELECT * FROM `users` WHERE uid='"+req.body.to_uid+"'", (err, result) => {
+                        if (!err && result.length > 0) {
+                            let raw_cash2 = result[0].raw_cash
+                            db.query("UPDATE users SET ? WHERE uid = '"+req.body.from_uid+"'" , {raw_cash: finalRaw_cash} ,(err , result1) => {
+                                if (!err) {
 
-                                let inc = parseInt(raw_cash2) + parseInt(transfer_amount)
+                                    let inc = parseInt(raw_cash2) + parseInt(transfer_amount)
 
-                                db.query("UPDATE users SET ? WHERE uid = '"+req.body.to_uid+"'" , {raw_cash: inc}, (err , result1) => {
-                                    console.log(err)
-                                    if (!err) {
+                                    db.query("UPDATE users SET ? WHERE uid = '"+req.body.to_uid+"'" , {raw_cash: inc}, (err , result1) => {
+                                        console.log(err)
+                                        if (!err) {
 
-                                        //Insert Transaction History
-                                        db.query("INSERT INTO `balance_transfer_history` SET ?", {
-                                            from_id: from_uid,
-                                            to_id: to_uid,
-                                            transfer_amount: transfer_amount
-                                        }, (err, result) => {
-                                        });
+                                            //Insert Transaction History
+                                            db.query("INSERT INTO `balance_transfer_history` SET ?", {
+                                                from_id: from_uid,
+                                                to_id: to_uid,
+                                                transfer_amount: transfer_amount
+                                            }, (err, result) => {
+                                            });
 
-                                        responseData.transfer_amount = transfer_amount;
-                                        responseData.from = from_uid
-                                        responseData.to = to_uid;
+                                            responseData.transfer_amount = transfer_amount;
+                                            responseData.from = from_uid
+                                            responseData.to = to_uid;
 
-                                        return _response.apiSuccess(res, "Balance Transferred Successfully" ,responseData)
-                                    }
-                                })
-
-
-                            }
-                        })
-
-                    }else {
-                        return  _response.apiWarning(res,"User not found")
-                    }
-                })
+                                            return _response.apiSuccess(res, "Balance Transferred Successfully" ,responseData)
+                                        }
+                                    })
 
 
+                                }
+                            })
 
-            }else {
-                return  _response.apiWarning(res,"Low balance!")
+                        }else {
+                            return  _response.apiWarning(res,"User not found")
+                        }
+                    })
+
+
+
+                }else {
+                    return  _response.apiWarning(res,"Low balance!")
+                }
             }
-        }
-    })
+        })
+    }
+
 }
 
 
