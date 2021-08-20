@@ -175,7 +175,7 @@ function details(req, res) {
             if (!err) {
                 db.query("SELECT SUM(value) AS total_refer_income FROM refer_income_history WHERE uid = '" + req.params.id + "'", (err, result2) => {
 
-                    db.query("SELECT SUM(value) AS total_expense_by_order FROM orders WHERE uid = '" + req.params.id + "'", (err, result3) => {
+                    db.query("SELECT SUM(total) AS total_expense_by_order FROM orders WHERE user_id = '" + req.params.id + "'", (err, result3) => {
 
                         db.query("SELECT SUM(amount) AS total_withdraw FROM withdraw_request WHERE uid = '" + req.params.id + "' AND status = " + 1 + " ", (err, result4) => {
 
@@ -183,17 +183,28 @@ function details(req, res) {
 
                                 db.query("SELECT SUM(value) AS total_joining_cost FROM joining_cost_history WHERE uid = '" + req.params.id + "'", (err, result6) => {
 
-                                    if (result1) responseData.total_daily_bonus = result1[0].total_daily_bonus; else responseData.total_daily_bonus = 0
-                                    if (result2) responseData.total_refer_income = result2[0].total_refer_income; else responseData.total_refer_income = 0
-                                    if (result3) responseData.total_expense_by_order = result3[0].total_expense_by_order; else responseData.total_expense_by_order = 0
-                                    if (result4) responseData.total_expense_by_withdraw = result4[0].total_withdraw; else responseData.total_withdraw = 0
-                                    responseData.total_income = parseInt(responseData.total_daily_bonus) + parseInt(responseData.total_refer_income)
-                                    responseData.total_expense = parseInt(responseData.total_expense_by_order) + parseInt(responseData.total_expense_by_withdraw)
-                                    if (result5) responseData.current_raw_balance = result5[0].current_raw_balance; else responseData.current_raw_balance = 0
-                                    if (result6) responseData.total_joining_cost = result6[0].total_joining_cost; else responseData.total_joining_cost = 0
+                                    db.query("SELECT SUM(transfer_amount) AS total_transfer_balance FROM balance_transfer_history WHERE from_id = '" + req.params.id + "'", (err, result7) => {
+
+                                        db.query("SELECT SUM(amount) AS total_convert_balance FROM balance_convert_history WHERE uid = '" + req.params.id + "'", (err, result8) => {
 
 
-                                    return _response.apiSuccess(res, responsemsg.found, responseData)
+                                            if (result1[0].total_daily_bonus !== null) responseData.total_daily_bonus = result1[0].total_daily_bonus; else responseData.total_daily_bonus = 0
+                                            if (result2[0].total_refer_income !== null) responseData.total_refer_income = result2[0].total_refer_income; else responseData.total_refer_income = 0
+                                            if (result3[0].total_expense_by_order !== null) responseData.total_expense_by_order = result3[0].total_expense_by_order; else responseData.total_expense_by_order = 0
+                                            if (result4[0].total_withdraw !== null) responseData.total_expense_by_withdraw = result4[0].total_withdraw; else responseData.total_withdraw = 0
+                                            responseData.total_income = parseInt(responseData.total_daily_bonus) + parseInt(responseData.total_refer_income)
+                                            responseData.total_expense = parseInt(responseData.total_expense_by_order) + parseInt(responseData.total_withdraw)
+                                            if (result5[0].current_raw_balance) responseData.current_raw_balance = result5[0].current_raw_balance; else responseData.current_raw_balance = 0
+                                            if (result6[0].total_joining_cost !== null) responseData.total_joining_cost = result6[0].total_joining_cost; else responseData.total_joining_cost = 0
+                                            if (result7[0].total_transfer_balance !== null) responseData.total_transfer_balance = result7[0].total_transfer_balance; else responseData.total_transfer_balance = 0
+                                            if (result8[0].total_convert_balance !== null) responseData.total_convert_balance = result8[0].total_convert_balance; else responseData.total_convert_balance = 0
+
+
+                                            return _response.apiSuccess(res, responsemsg.found, responseData)
+                                        })
+                                    })
+
+
 
                                 })
 
