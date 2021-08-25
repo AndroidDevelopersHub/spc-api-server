@@ -21,9 +21,10 @@ module.exports = function (router) {
 
     router.get('/balance-transfer-history/:uid', history1);
     router.get('/balance-convert-history/:uid', history2);
-    router.get('/refer-income-history/:uid', history3);
+    router.get('/generation-income-history/:uid', history3);
     router.get('/joining-cost-history/:uid', history4);
     router.get('/daily-bonus-history/:uid', history5);
+    router.get('/refer-income-history/:uid', history6);
 
 
 }
@@ -88,6 +89,17 @@ function history5(req,res){
     }
 }
 
+function history6(req,res){
+    if (req.params.uid){
+
+        db.query("SELECT * FROM `refer_income_history_v2` WHERE uid='"+req.params.uid+"'", (err, result) => {
+            if (!err){
+                return _response.apiSuccess(res, "" ,result)
+            }})
+    }else {
+        return  _response.apiWarning(res,"Insert uid")
+    }
+}
 
 
 

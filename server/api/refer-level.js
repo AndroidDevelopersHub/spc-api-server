@@ -33,7 +33,7 @@ function add(req, res){
     // if (error) return _response.apiFailed(res ,error.details[0].message)
 
     console.log('User not exist')
-    db.query("INSERT INTO slider SET ?", req.body , (err, result) => {
+    db.query("INSERT INTO refer_level SET ?", req.body , (err, result) => {
         if (!err) {
             return _response.apiSuccess(res, responsemsg.saveSuccess , result)
         } else {
@@ -58,7 +58,7 @@ async function list(req ,res ){
     var offset = (page - 1) * limit
 
 
-    db.query("SELECT COUNT(*) AS total FROM slider", (err, result) => {
+    db.query("SELECT COUNT(*) AS total FROM refer_level", (err, result) => {
         if (!err) {
             totalDocs = result[0].total
         } else {
@@ -71,7 +71,7 @@ async function list(req ,res ){
     //Search by String
     if (req.query.search_string && req.query.search_string !== ''){
 
-        db.query("SELECT * FROM slider WHERE CONCAT(title) REGEXP '"+req.query.search_string+"'  LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
+        db.query("SELECT * FROM refer_level WHERE CONCAT(title) REGEXP '"+req.query.search_string+"'  LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length+" "+responsemsg.found , result,{page: parseInt(page) , limit: parseInt(limit),totalDocs: totalDocs })
 
@@ -82,7 +82,7 @@ async function list(req ,res ){
 
 
     }else {
-        db.query("SELECT * FROM slider LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
+        db.query("SELECT * FROM refer_level LIMIT "+limit+" OFFSET "+offset+" ", (err, result) => {
             if (!err) {
                 return _response.apiSuccess(res, result.length+" "+responsemsg.found , result , {page: parseInt(page) , limit: parseInt(limit),totalDocs: totalDocs })
 
@@ -99,10 +99,10 @@ function update(req ,res ){
     var formData = []
 
     if (req.params.id){
-        db.query("SELECT * FROM `slider` WHERE id='"+req.params.id+"'", (err, result) => {
+        db.query("SELECT * FROM `refer_level` WHERE id='"+req.params.id+"'", (err, result) => {
             if (!err && result.length > 0) {
 
-                db.query("UPDATE slider SET ? WHERE id = '"+req.params.id+"'" , req.body ,(err , result) =>{
+                db.query("UPDATE refer_level SET ? WHERE id = '"+req.params.id+"'" , req.body ,(err , result) =>{
                     if (!err){
                         return _response.apiSuccess(res, responsemsg.updateSuccess)
                     }else{
@@ -124,7 +124,7 @@ function update(req ,res ){
 function details(req ,res ){
     //const result = bcrypt.compareSync('123', hash);
     if (req.params.id){
-        db.query("SELECT * FROM `slider` WHERE id='"+req.params.id+"'", (err, result) => {
+        db.query("SELECT * FROM `refer_level` WHERE id='"+req.params.id+"'", (err, result) => {
             if (!err && result.length > 0) {
                 return _response.apiSuccess(res, result.length+" "+responsemsg.found ,result)
             } else {
@@ -139,11 +139,11 @@ function details(req ,res ){
 function _delete(req ,res){
 
     if (req.params.id){
-        db.query("SELECT * FROM `slider` WHERE id='"+req.params.id+"'", (err, result) => {
+        db.query("SELECT * FROM `refer_level` WHERE id='"+req.params.id+"'", (err, result) => {
             if (!result.length){
                 return _response.apiWarning(res, responsemsg.listIsEmpty)
             }else {
-                db.query("DELETE FROM `slider` WHERE id='" + req.params.id + "'", (err, result) => {
+                db.query("DELETE FROM `refer_level` WHERE id='" + req.params.id + "'", (err, result) => {
                     if (!err) {
                         return _response.apiSuccess(res, responsemsg.deleteSuccess)
                     } else {

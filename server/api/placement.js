@@ -89,3 +89,61 @@ async function list(req, res) {
 
 }
 
+function placementTree(req, id, name, callback) {
+    db.query("SELECT uid,username FROM users WHERE placement_id = '" + id + "'", (err, result1) => {
+        if (!err) {
+            let responseData = {}
+            //responseData.tree_one = result1
+
+
+            let query1 = ""
+            let query2 = ""
+            let query3 = ""
+
+            if (result1[0] !== undefined) query1 = "select uid,username,placement_id from (select * from users order by placement_id, uid WHERE team_position = 'A') products_sorted, (select @pv := '" + result1[0].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+            if (result1[1] !== undefined) query2 = "select uid,username,placement_id from (select * from users order by placement_id, uid WHERE team_position = 'B') products_sorted, (select @pv := '" + result1[1].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+            if (result1[2] !== undefined) query3 = "select uid,username,placement_id from (select * from users order by placement_id, uid WHERE team_position = 'C') products_sorted, (select @pv := '" + result1[2].uid + "') initialisation where   find_in_set(placement_id, @pv) and     length(@pv := concat(@pv, ',', uid))"
+            if (query1 !== "") {
+                db.query(query1, (err, result) => {
+                    if (!err) {
+                        responseData[name] = {}
+                        responseData[name].one = result.length + 1
+                        if (query2 !== "") {
+                            db.query(query2, (err, result) => {
+                                if (!err) {
+                                    responseData[name].two = result.length + 1
+                                    if (query3 !== "") {
+                                        db.query(query3, (err, result) => {
+                                            if (!err) {
+                                                responseData[name].three = result.length + 1
+                                                //return _response.apiSuccess(res, " " + responsemsg.found, responseData)
+                                                return callback(responseData)
+
+                                            }else {
+                                                return callback(responseData)
+                                            }
+                                        })
+                                    } else {
+                                        return callback(responseData)
+                                        //return _response.apiSuccess(res,   " " + responsemsg.found, responseData);
+                                    }
+                                }
+                            })
+                        } else {
+                            // return _response.apiSuccess(res,   " " + responsemsg.found, responseData);
+                            return callback(responseData)
+                        }
+                    }else {
+                        return callback(responseData)
+                    }
+                })
+            } else {
+
+                return callback(responseData)
+            }
+        } else {
+            return _response.apiFailed(res, responsemsg.listIsEmpty)
+        }
+    });
+}
+

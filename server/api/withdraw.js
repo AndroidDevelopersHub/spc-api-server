@@ -28,47 +28,22 @@ function add(req, res) {
     // const { error } = schema.validate(req.body);
     // if (error) return _response.apiFailed(res ,error.details[0].message)
 
+
+
     let user_id = req.body.uid
     db.query("SELECT * FROM `users` WHERE uid = '" + user_id + "' ", (err, result00) => {
         if (result00.length > 0) {
-            let myWinCash = parseInt(result00[0].win_cash);
+            //let myWinCash = parseInt(result00[0].win_cash);
             let myRawCash = parseInt(result00[0].raw_cash);
-            let aa = myWinCash + myRawCash;
+            let aa = myRawCash;
             let total = req.body.amount;
 
+            if (parseInt(total) >= 300){
 
-            if (total != null && parseInt(aa) < parseInt(total)) {
-                return _response.apiWarning(res, "Low balance!")
-            } else {
-
-                if (myWinCash >= total) {
-                    console.log("----------1")
-                    console.log(myWinCash - total)
-
+                if (parseInt(aa) >= parseInt(total)){
+                    let finalX = aa - total;
                     db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
-                        win_cash: myWinCash - total
-                    }, (err22, result11) => {
-                        if (!err22) {
-                            //TODO:
-                            db.query("INSERT INTO withdraw_request SET ?", req.body, (err, result) => {
-                                if (!err) {
-                                    return _response.apiSuccess(res, responsemsg.saveSuccess, result)
-                                } else {
-                                    return _response.apiFailed(res, err, result)
-                                }
-                            });
-                        }
-                    })
-
-                } else if ((myWinCash + myRawCash) > total) {
-                    console.log("----------2")
-
-                    let a = total - myWinCash
-                    let b = myRawCash - a;
-
-                    db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
-                        win_cash: 0,
-                        raw_cash: b
+                        raw_cash: finalX
                     }, (err11, result11) => {
 
                         if (!err11) {
@@ -82,19 +57,92 @@ function add(req, res) {
                             });
                         }
                     })
-
-                } else {
-                    console.log("----------3")
+                }else {
                     return _response.apiWarning(res, "Low balance!")
                 }
 
+            }else {
+                return _response.apiWarning(res, "Minimum withdraw required 300 BDT")
             }
-
-
         } else {
             return _response.apiWarning(res, "User not found")
         }
     })
+
+
+
+
+    /*
+
+        let user_id = req.body.uid
+        db.query("SELECT * FROM `users` WHERE uid = '" + user_id + "' ", (err, result00) => {
+            if (result00.length > 0) {
+                let myWinCash = parseInt(result00[0].win_cash);
+                let myRawCash = parseInt(result00[0].raw_cash);
+                let aa = myWinCash + myRawCash;
+                let total = req.body.amount;
+
+                if (parseInt(total) >= 300){
+                    if (total != null && parseInt(aa) < parseInt(total)) {
+                        return _response.apiWarning(res, "Low balance!")
+                    } else {
+
+                        if (myWinCash >= total) {
+                            console.log("----------1")
+                            console.log(myWinCash - total)
+
+                            db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
+                                win_cash: myWinCash - total
+                            }, (err22, result11) => {
+                                if (!err22) {
+                                    //TODO:
+                                    db.query("INSERT INTO withdraw_request SET ?", req.body, (err, result) => {
+                                        if (!err) {
+                                            return _response.apiSuccess(res, responsemsg.saveSuccess, result)
+                                        } else {
+                                            return _response.apiFailed(res, err, result)
+                                        }
+                                    });
+                                }
+                            })
+
+                        } else if ((myWinCash + myRawCash) > total) {
+                            console.log("----------2")
+
+                            let a = total - myWinCash
+                            let b = myRawCash - a;
+
+                            db.query("UPDATE users SET ? WHERE uid = '" + user_id + "'", {
+                                win_cash: 0,
+                                raw_cash: b
+                            }, (err11, result11) => {
+
+                                if (!err11) {
+                                    //TODO:
+                                    db.query("INSERT INTO withdraw_request SET ?", req.body, (err, result) => {
+                                        if (!err) {
+                                            return _response.apiSuccess(res, responsemsg.saveSuccess, result)
+                                        } else {
+                                            return _response.apiFailed(res, err, result)
+                                        }
+                                    });
+                                }
+                            })
+
+                        } else {
+                            console.log("----------3")
+                            return _response.apiWarning(res, "Low balance!")
+                        }
+                    }
+
+                }else {
+                    return _response.apiWarning(res, "Minimum withdraw required 300 BDT")
+                }
+            } else {
+                return _response.apiWarning(res, "User not found")
+            }
+        })
+    */
 
 
 }
